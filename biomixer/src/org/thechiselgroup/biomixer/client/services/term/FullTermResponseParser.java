@@ -110,6 +110,7 @@ public class FullTermResponseParser extends AbstractXMLResultParser {
         String fullConceptId = getConceptId(node);
         String shortConceptId = getText(node, "id/text()");
         String label = getText(node, "label/text()");
+        String definition = getText(node, "definitions/string/text()");
 
         Resource resource = new Resource(Concept.toConceptURI(ontologyId,
                 fullConceptId));
@@ -117,6 +118,7 @@ public class FullTermResponseParser extends AbstractXMLResultParser {
         resource.putValue(Concept.SHORT_ID, shortConceptId);
         resource.putValue(Concept.LABEL, label);
         resource.putValue(Concept.VIRTUAL_ONTOLOGY_ID, ontologyId);
+        resource.putValue(Concept.DEFINITION, definition);
 
         ResourceNeighbourhood neighbourhood = parseNeighbourhood(ontologyId,
                 xmlText);

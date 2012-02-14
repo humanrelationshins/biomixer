@@ -18,6 +18,9 @@ package org.thechiselgroup.biomixer.client.services.term;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.thechiselgroup.biomixer.client.Concept;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
@@ -26,10 +29,10 @@ import org.thechiselgroup.biomixer.server.workbench.util.xml.StandardJavaXMLDocu
 
 public class LightTermResponseWithoutRelationshipsParserTest {
 
+    private LightTermResponseWithoutRelationshipsParser underTest;
+
     @Test
     public void parseResponse() throws Exception {
-        LightTermResponseWithoutRelationshipsParser underTest = new LightTermResponseWithoutRelationshipsParser(
-                new StandardJavaXMLDocumentProcessor());
         String responseXML = IOUtils
                 .readIntoString(LightTermResponseWithoutRelationshipsParserTest.class
                         .getResourceAsStream("term-service-light-norelationships.response"));
@@ -48,6 +51,28 @@ public class LightTermResponseWithoutRelationshipsParserTest {
         assertThat((String) concept.getValue(Concept.LABEL),
                 equalTo("Delivery"));
         assertThat((String) concept.getValue(Concept.TYPE), equalTo("class"));
+        assertThat((String) concept.getValue(Concept.DEFINITION), equalTo(""));
+    }
+
+    @Test
+    public void parseResponseContainingDefinition() throws Exception {
+        Resource concept = underTest
+                .parseConcept(
+                        "1070",
+                        IOUtils.readIntoString(LightTermResponseWithoutRelationshipsParserTest.class
+                                .getResourceAsStream("term-service-light-definition.response")));
+
+        assertThat(concept.getUri(), equalTo(Concept.toConceptURI("1070",
+                "http://purl.org/obo/owl/GO#GO_0007569")));
+        assertThat(
+                (String) concept.getValue(Concept.DEFINITION),
+                equalTo("Progression of the cell from its inception to the end of its lifespan."));
+    }
+
+    @Before
+    public void setUp() throws ParserConfigurationException {
+        underTest = new LightTermResponseWithoutRelationshipsParser(
+                new StandardJavaXMLDocumentProcessor());
     }
 
 }

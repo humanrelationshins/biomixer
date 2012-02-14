@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<success>
+  <accessedResource>/bioportal/virtual/ontology/1070</accessedResource>
+  <accessDate>2012-02-14 08:41:10.473 PST</accessDate>
+  <data>
+    <classBean>
+      <id>GO:0007569</id>
+      <fullId>http://purl.org/obo/owl/GO#GO_0007569</fullId>
+
+      <label>cell aging</label>
+      <type>class</type>
+      <synonyms>
+        <string>cell ageing</string>
+      </synonyms>
+      <definitions>
+        <string>Progression of the cell from its inception to the end of its lifespan.</string>
+
+      </definitions>
+      <relations>
+        <entry>
+          <string>xref_definition</string>
+          <list>
+            <string>PMID:12044934</string>
+            <string>GOC:jh</string>
+
+          </list>
+        </entry>
+      </relations>
+    </classBean>
+  </data>
+</success>

@@ -61,6 +61,17 @@ public final class Concept {
 
     public static final String PARENT_CONCEPTS = "parentConcepts";
 
+    public static final String DEFINITION = "definition";
+
+    public static List<String> asUris(String virtualOntologyId,
+            String... conceptIds) {
+        List<String> uris = new ArrayList<String>();
+        for (String conceptId : conceptIds) {
+            uris.add(toConceptURI(virtualOntologyId, conceptId));
+        }
+        return uris;
+    }
+
     // TODO change to full id
     public static Resource createConceptResource(String ontologyId,
             String conceptId) {
@@ -108,15 +119,6 @@ public final class Concept {
     }
 
     private Concept() {
-    }
-
-    public static List<String> asUris(String virtualOntologyId,
-            String... conceptIds) {
-        List<String> uris = new ArrayList<String>();
-        for (String conceptId : conceptIds) {
-            uris.add(toConceptURI(virtualOntologyId, conceptId));
-        }
-        return uris;
     }
 
 }

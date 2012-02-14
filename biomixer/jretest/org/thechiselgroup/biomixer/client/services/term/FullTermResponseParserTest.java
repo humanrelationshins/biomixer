@@ -48,9 +48,8 @@ public class FullTermResponseParserTest {
     }
 
     private String getResponseXML(String xmlFilename) throws IOException {
-        return IOUtils
-                .readIntoString(FullTermResponseParserTest.class
-                        .getResourceAsStream(xmlFilename));
+        return IOUtils.readIntoString(FullTermResponseParserTest.class
+                .getResourceAsStream(xmlFilename));
     }
 
     @Test
@@ -69,20 +68,16 @@ public class FullTermResponseParserTest {
         UriList parentUris = (UriList) partialProperties
                 .get(Concept.PARENT_CONCEPTS);
 
-        assertThat(
-                childUris,
-                containsExactly(Concept.asUris(virtualOntologyId,
-                        "http://purl.org/obo/owl/GO#GO_0001300",
-                        "http://purl.org/obo/owl/GO#GO_0090398",
-                        "http://purl.org/obo/owl/GO#GO_0001302",
-                        "http://purl.org/obo/owl/GO#GO_0007576",
-                        "http://purl.org/obo/owl/GO#GO_0001301")));
+        assertThat(childUris, containsExactly(Concept.asUris(virtualOntologyId,
+                "http://purl.org/obo/owl/GO#GO_0001300",
+                "http://purl.org/obo/owl/GO#GO_0090398",
+                "http://purl.org/obo/owl/GO#GO_0001302",
+                "http://purl.org/obo/owl/GO#GO_0007576",
+                "http://purl.org/obo/owl/GO#GO_0001301")));
 
-        assertThat(
-                parentUris,
-                containsExactly(Concept.asUris(virtualOntologyId,
-                        "http://purl.org/obo/owl/GO#GO_0007568",
-                        "http://purl.org/obo/owl/GO#GO_0009987")));
+        assertThat(parentUris, containsExactly(Concept.asUris(
+                virtualOntologyId, "http://purl.org/obo/owl/GO#GO_0007568",
+                "http://purl.org/obo/owl/GO#GO_0009987")));
     }
 
     @Test
@@ -103,6 +98,9 @@ public class FullTermResponseParserTest {
                 equalTo(5));
         assertThat(result.getUriListValue(Concept.PARENT_CONCEPTS).size(),
                 equalTo(2));
+        assertThat(
+                (String) result.getValue(Concept.DEFINITION),
+                equalTo("Progression of the cell from its inception to the end of its lifespan."));
     }
 
     @Before
