@@ -51,6 +51,9 @@ public class GraphExpansionRegistryFactory {
         registry.putNodeMenuEntry(Mapping.RESOURCE_URI_PREFIX, "Concepts",
                 new MappingExpander(resourceManager));
 
+        registry.putNodeMenuEntry(Concept.RESOURCE_URI_PREFIX, "Remove",
+                new MappingExpander(resourceManager));
+
         return registry;
     }
 
