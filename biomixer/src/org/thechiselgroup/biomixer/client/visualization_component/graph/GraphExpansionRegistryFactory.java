@@ -9,6 +9,7 @@ import org.thechiselgroup.biomixer.client.graph.ConceptConceptNeighbourhoodExpan
 import org.thechiselgroup.biomixer.client.graph.ConceptConceptNeighbourhoodLoader;
 import org.thechiselgroup.biomixer.client.graph.ConceptMappingNeighbourhoodExpander;
 import org.thechiselgroup.biomixer.client.graph.ConceptMappingNeighbourhoodLoader;
+import org.thechiselgroup.biomixer.client.graph.GraphNodeNeighbourhoodRemover;
 import org.thechiselgroup.biomixer.client.graph.MappingExpander;
 import org.thechiselgroup.biomixer.client.services.mapping.MappingServiceAsync;
 import org.thechiselgroup.biomixer.client.services.term.ConceptNeighbourhoodServiceAsync;
@@ -51,8 +52,10 @@ public class GraphExpansionRegistryFactory {
         registry.putNodeMenuEntry(Mapping.RESOURCE_URI_PREFIX, "Concepts",
                 new MappingExpander(resourceManager));
 
-        registry.putNodeMenuEntry(Concept.RESOURCE_URI_PREFIX, "Remove",
-                new MappingExpander(resourceManager));
+        registry.putNodeMenuEntry(
+                Concept.RESOURCE_URI_PREFIX,
+                "Remove",
+                new GraphNodeNeighbourhoodRemover(errorHandler, resourceManager));
 
         return registry;
     }

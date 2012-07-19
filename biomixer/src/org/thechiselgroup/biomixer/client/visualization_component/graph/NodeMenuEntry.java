@@ -21,6 +21,8 @@ public class NodeMenuEntry {
 
     private String label;
 
+    private GraphNodeRemover remover;
+
     public NodeMenuEntry(String label, GraphNodeExpander expander) {
         this.label = label;
         this.expander = expander;
@@ -34,4 +36,7 @@ public class NodeMenuEntry {
         return label;
     }
 
+    public GraphNodeRemover getRemover() {
+        return remover;
+    }
 }

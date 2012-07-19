@@ -34,4 +34,7 @@ public interface GraphExpansionRegistry {
     void putNodeMenuEntry(String category, String label,
             GraphNodeExpander expander);
 
+    void putNodeMenuEntry(String category, String label,
+            GraphNodeRemover remover);
+
 }

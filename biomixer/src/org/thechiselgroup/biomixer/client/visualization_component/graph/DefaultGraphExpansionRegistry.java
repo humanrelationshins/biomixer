@@ -89,4 +89,14 @@ public class DefaultGraphExpansionRegistry implements GraphExpansionRegistry {
 
         putNodeMenuEntry(category, new NodeMenuEntry(label, expander));
     }
+
+    @Override
+    public void putNodeMenuEntry(String category, String label,
+            GraphNodeRemover remover) {
+        assert category != null;
+        assert label != null;
+        assert remover != null;
+
+        putNodeMenuEntry(category, label, remover);
+    }
 }
