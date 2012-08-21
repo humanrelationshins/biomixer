@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandler;
 import org.thechiselgroup.biomixer.client.core.geometry.Point;
 import org.thechiselgroup.biomixer.client.core.util.animation.TestAnimationRunner;
 import org.thechiselgroup.biomixer.client.svg.AbstractSvgTest;
@@ -27,6 +28,8 @@ import org.thechiselgroup.biomixer.client.visualization_component.graph.svg_widg
 import org.thechiselgroup.biomixer.client.visualization_component.graph.widget.Arc;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.widget.Node;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.widget.NodeMenuItemClickedHandler;
+import org.thechiselgroup.biomixer.client.visualization_component.graph.widget.NodeMouseClickEvent;
+import org.thechiselgroup.biomixer.client.visualization_component.graph.widget.NodeMouseClickHandler;
 import org.thechiselgroup.biomixer.server.workbench.util.xml.StandardJavaXMLDocumentProcessor;
 import org.thechiselgroup.biomixer.shared.svg.text_renderer.TextSvgElementFactory;
 
@@ -44,6 +47,8 @@ public abstract class AbstractGraphSvgDisplayTest extends AbstractSvgTest {
 
     protected static final String N2 = "n2";
 
+    protected static final String N3 = "n3";
+
     protected static final String A1 = "a1";
 
     protected static final String MENU_ITEM_0_LABEL = "MenuItem0";
@@ -51,6 +56,12 @@ public abstract class AbstractGraphSvgDisplayTest extends AbstractSvgTest {
     protected static final String MENU_ITEM_1_LABEL = "MenuItem1";
 
     protected static final String MENU_ITEM_2_LABEL = "MenuItem2";
+
+    @Mock
+    protected ErrorHandler errorHandler;
+
+    @Mock
+    protected NodeMouseClickHandler nodeMouseClickHandler;
 
     @Mock
     protected NodeMenuItemClickedHandler menuItemHandler0;
@@ -73,14 +84,14 @@ public abstract class AbstractGraphSvgDisplayTest extends AbstractSvgTest {
     }
 
     protected Node addNode(String id, String label, String type) {
-        Node node = new Node(id, label, type);
+        Node node = new Node(id, label, type, 1);
         underTest.addNode(node);
         return node;
     }
 
     protected TestAnimationRunner animate(Node node, Point destination) {
         underTest.animateMoveTo(node, destination);
-        return underTest.getAnimationRunner();
+        return underTest.getTestAnimationRunner();
     }
 
     /**
@@ -119,7 +130,9 @@ public abstract class AbstractGraphSvgDisplayTest extends AbstractSvgTest {
     public void setUpGraphDisplay() {
         MockitoAnnotations.initMocks(this);
         underTest = new TestGraphSvgDisplay(400, 300,
-                new TextSvgElementFactory());
+                new TextSvgElementFactory(), errorHandler);
+        underTest.addEventHandler(NodeMouseClickEvent.TYPE,
+                nodeMouseClickHandler);
         underTest.addNodeMenuItemHandler(MENU_ITEM_0_LABEL, menuItemHandler0,
                 TYPE1);
         underTest.addNodeMenuItemHandler(MENU_ITEM_1_LABEL, menuItemHandler1,
