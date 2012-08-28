@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.thechiselgroup.biomixer.client.Concept;
+import org.thechiselgroup.biomixer.client.core.command.ParameterizedCommand;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.resources.UriList;
+import org.thechiselgroup.biomixer.client.core.util.collections.ChunkedCollectionUtils;
 import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactory;
 import org.thechiselgroup.biomixer.client.core.util.collections.LightweightList;
 import org.thechiselgroup.biomixer.client.services.AbstractJsonResultParser;
@@ -50,11 +52,11 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
         super(jsonParser);
     }
 
-    public ResourceNeighbourhood parseNeighbourhood(String ontologyId,
+    public ResourceNeighbourhood parseNeighbourhood(final String ontologyId,
             String json) {
-        UriList parentConcepts = new UriList();
-        UriList childConcepts = new UriList();
-        List<Resource> resources = new ArrayList<Resource>();
+        final UriList parentConcepts = new UriList();
+        final UriList childConcepts = new UriList();
+        final List<Resource> resources = new ArrayList<Resource>();
 
         /*
          * Note: only entries with a list attribute are retrieved
@@ -73,53 +75,110 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
             }
         }
 
-        for (int i = 0; i < queriedResourceRelations.size(); i++) {
-            Object entry = queriedResourceRelations.get(i);
+        int breakTime = 200;
+        int chunkSize = queriedResourceRelations.size() / 2;
 
-            String relationType = asString(get(entry, "string"));
-            if (relationType == null
-                    || !("SubClass".equals(relationType) || "SuperClass"
-                            .equals(relationType))) {
-                /*
-                 * XXX OBO relations (such as 'negatively_regulates', '[R]is_a')
-                 * get ignored
-                 */
-                continue;
-            }
+        ChunkedCollectionUtils.forEach(queriedResourceRelations,
+                new ParameterizedCommand<Object>() {
 
-            Object entryListContents = get(get(get(entry, "list"), 0),
-                    "classBean"); // "$.list[0].classBean"
-            if (entryListContents == null || !isArray(entryListContents)) {
-                // if there is just one classbean it is not stored in an array
-                // XXX CLEAN THIS UP
-                // JsonItem item = getItem(entry.stringValue(),
-                // "$.list[0].classBean");
-                if (entryListContents == null // TODO ! isObject
-                        || asString(get(entryListContents, "id")).equals(
-                                OWL_THING)) {
-                    continue;
-                }
-                Resource neighbour = process(entryListContents,
-                        "SuperClass".equals(relationType), ontologyId,
-                        parentConcepts, childConcepts);
-                resources.add(neighbour);
-                continue;
-            }
+                    @Override
+                    public void execute(Object entry) {
+                        String relationType = asString(get(entry, "string"));
+                        if (relationType == null
+                                || !("SubClass".equals(relationType) || "SuperClass"
+                                        .equals(relationType))) {
+                            /*
+                             * XXX OBO relations (such as
+                             * 'negatively_regulates', '[R]is_a') get ignored
+                             */
+                            return;
+                        }
 
-            for (int j = 0; j < length(entryListContents); j++) {
-                Object relation = get(entryListContents, j);
+                        Object entryListContents = get(
+                                get(get(entry, "list"), 0), "classBean"); // "$.list[0].classBean"
+                        if (entryListContents == null
+                                || !isArray(entryListContents)) {
+                            // if there is just one classbean it is not stored
+                            // in an array
+                            // XXX CLEAN THIS UP
+                            // JsonItem item = getItem(entry.stringValue(),
+                            // "$.list[0].classBean");
+                            if (entryListContents == null // TODO ! isObject
+                                    || asString(get(entryListContents, "id"))
+                                            .equals(OWL_THING)) {
+                                return;
+                            }
+                            Resource neighbour = process(entryListContents,
+                                    "SuperClass".equals(relationType),
+                                    ontologyId, parentConcepts, childConcepts);
+                            resources.add(neighbour);
+                            return;
+                        }
 
-                if (asString(get(relation, "id")).equals(OWL_THING)) {
-                    // don't include owl:Thing as a neighbour
-                    continue;
-                }
+                        for (int j = 0; j < length(entryListContents); j++) {
+                            Object relation = get(entryListContents, j);
 
-                Resource neighbour = process(relation,
-                        "SuperClass".equals(relationType), ontologyId,
-                        parentConcepts, childConcepts);
-                resources.add(neighbour);
-            }
-        }
+                            if (asString(get(relation, "id")).equals(OWL_THING)) {
+                                // don't include owl:Thing as a neighbour
+                                continue;
+                            }
+
+                            Resource neighbour = process(relation,
+                                    "SuperClass".equals(relationType),
+                                    ontologyId, parentConcepts, childConcepts);
+                            resources.add(neighbour);
+                        }
+
+                    }
+                }, chunkSize, breakTime);
+
+        // for (int i = 0; i < queriedResourceRelations.size(); i++) {
+        // Object entry = queriedResourceRelations.get(i);
+        //
+        // String relationType = asString(get(entry, "string"));
+        // if (relationType == null
+        // || !("SubClass".equals(relationType) || "SuperClass"
+        // .equals(relationType))) {
+        // /*
+        // * XXX OBO relations (such as 'negatively_regulates', '[R]is_a')
+        // * get ignored
+        // */
+        // continue;
+        // }
+        //
+        // Object entryListContents = get(get(get(entry, "list"), 0),
+        // "classBean"); // "$.list[0].classBean"
+        // if (entryListContents == null || !isArray(entryListContents)) {
+        // // if there is just one classbean it is not stored in an array
+        // // XXX CLEAN THIS UP
+        // // JsonItem item = getItem(entry.stringValue(),
+        // // "$.list[0].classBean");
+        // if (entryListContents == null // TODO ! isObject
+        // || asString(get(entryListContents, "id")).equals(
+        // OWL_THING)) {
+        // continue;
+        // }
+        // Resource neighbour = process(entryListContents,
+        // "SuperClass".equals(relationType), ontologyId,
+        // parentConcepts, childConcepts);
+        // resources.add(neighbour);
+        // continue;
+        // }
+        //
+        // for (int j = 0; j < length(entryListContents); j++) {
+        // Object relation = get(entryListContents, j);
+        //
+        // if (asString(get(relation, "id")).equals(OWL_THING)) {
+        // // don't include owl:Thing as a neighbour
+        // continue;
+        // }
+        //
+        // Resource neighbour = process(relation,
+        // "SuperClass".equals(relationType), ontologyId,
+        // parentConcepts, childConcepts);
+        // resources.add(neighbour);
+        // }
+        // }
 
         Map<String, Serializable> partialProperties = CollectionFactory
                 .createStringMap();
