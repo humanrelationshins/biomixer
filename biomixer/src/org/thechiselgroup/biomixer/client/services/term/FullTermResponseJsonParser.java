@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.services.term;
 
+import static org.thechiselgroup.biomixer.client.core.util.collections.ChunkedCollectionUtils.forEach;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,6 @@ import org.thechiselgroup.biomixer.client.Concept;
 import org.thechiselgroup.biomixer.client.core.command.ParameterizedCommand;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.resources.UriList;
-import org.thechiselgroup.biomixer.client.core.util.collections.ChunkedCollectionUtils;
 import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactory;
 import org.thechiselgroup.biomixer.client.core.util.collections.LightweightList;
 import org.thechiselgroup.biomixer.client.services.AbstractJsonResultParser;
@@ -76,61 +77,59 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
         }
 
         int breakTime = 200;
-        int chunkSize = queriedResourceRelations.size() / 2;
+        int chunkSize = 10;
 
-        ChunkedCollectionUtils.forEach(queriedResourceRelations,
-                new ParameterizedCommand<Object>() {
+        forEach(queriedResourceRelations, new ParameterizedCommand<Object>() {
 
-                    @Override
-                    public void execute(Object entry) {
-                        String relationType = asString(get(entry, "string"));
-                        if (relationType == null
-                                || !("SubClass".equals(relationType) || "SuperClass"
-                                        .equals(relationType))) {
-                            /*
-                             * XXX OBO relations (such as
-                             * 'negatively_regulates', '[R]is_a') get ignored
-                             */
-                            return;
-                        }
+            @Override
+            public void execute(Object entry) {
+                String relationType = asString(get(entry, "string"));
+                if (relationType == null
+                        || !("SubClass".equals(relationType) || "SuperClass"
+                                .equals(relationType))) {
+                    /*
+                     * XXX OBO relations (such as 'negatively_regulates',
+                     * '[R]is_a') get ignored
+                     */
+                    return;
+                }
 
-                        Object entryListContents = get(
-                                get(get(entry, "list"), 0), "classBean"); // "$.list[0].classBean"
-                        if (entryListContents == null
-                                || !isArray(entryListContents)) {
-                            // if there is just one classbean it is not stored
-                            // in an array
-                            // XXX CLEAN THIS UP
-                            // JsonItem item = getItem(entry.stringValue(),
-                            // "$.list[0].classBean");
-                            if (entryListContents == null // TODO ! isObject
-                                    || asString(get(entryListContents, "id"))
-                                            .equals(OWL_THING)) {
-                                return;
-                            }
-                            Resource neighbour = process(entryListContents,
-                                    "SuperClass".equals(relationType),
-                                    ontologyId, parentConcepts, childConcepts);
-                            resources.add(neighbour);
-                            return;
-                        }
-
-                        for (int j = 0; j < length(entryListContents); j++) {
-                            Object relation = get(entryListContents, j);
-
-                            if (asString(get(relation, "id")).equals(OWL_THING)) {
-                                // don't include owl:Thing as a neighbour
-                                continue;
-                            }
-
-                            Resource neighbour = process(relation,
-                                    "SuperClass".equals(relationType),
-                                    ontologyId, parentConcepts, childConcepts);
-                            resources.add(neighbour);
-                        }
-
+                Object entryListContents = get(get(get(entry, "list"), 0),
+                        "classBean"); // "$.list[0].classBean"
+                if (entryListContents == null || !isArray(entryListContents)) {
+                    // if there is just one classbean it is not stored
+                    // in an array
+                    // XXX CLEAN THIS UP
+                    // JsonItem item = getItem(entry.stringValue(),
+                    // "$.list[0].classBean");
+                    if (entryListContents == null // TODO ! isObject
+                            || asString(get(entryListContents, "id")).equals(
+                                    OWL_THING)) {
+                        return;
                     }
-                }, chunkSize, breakTime);
+                    Resource neighbour = process(entryListContents,
+                            "SuperClass".equals(relationType), ontologyId,
+                            parentConcepts, childConcepts);
+                    resources.add(neighbour);
+                    return;
+                }
+
+                for (int j = 0; j < length(entryListContents); j++) {
+                    Object relation = get(entryListContents, j);
+
+                    if (asString(get(relation, "id")).equals(OWL_THING)) {
+                        // don't include owl:Thing as a neighbour
+                        continue;
+                    }
+
+                    Resource neighbour = process(relation,
+                            "SuperClass".equals(relationType), ontologyId,
+                            parentConcepts, childConcepts);
+                    resources.add(neighbour);
+                }
+
+            }
+        }, chunkSize, breakTime);
 
         // for (int i = 0; i < queriedResourceRelations.size(); i++) {
         // Object entry = queriedResourceRelations.get(i);
