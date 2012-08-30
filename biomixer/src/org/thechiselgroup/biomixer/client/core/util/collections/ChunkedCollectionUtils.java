@@ -45,6 +45,9 @@ public final class ChunkedCollectionUtils {
     public static <T> void forEach(Iterable<T> loopItems,
             ParameterizedCommand<T> loopAction, int chunkSize, int breakTime) {
 
+        assert chunkSize > 0 : "Chunk size must be a positive integer";
+        assert breakTime >= 0 : "Break time must be greater than or equal to zero";
+
         int currentIndex = 0;
         for (T item : loopItems) {
             if (currentIndex % chunkSize == 0) {
