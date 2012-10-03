@@ -94,8 +94,10 @@ public class BioMixerDetailsWidgetHelper extends AbstractDetailsWidgetHelper {
             if (resource.getValue(Concept.DEFINITION) != null
                     && !((String) resource.getValue(Concept.DEFINITION))
                             .equals("")) {
+                // turning on wrapping for the definition. By default there is
+                // no wrap.
                 addRow(resource, verticalPanel, "Definition",
-                        Concept.DEFINITION);
+                        Concept.DEFINITION, false);
             }
 
         } else if (Mapping.isMapping(resource)) {

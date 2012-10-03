@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 David Rusk
+ * Copyright 2012 David Rusk, Bo Fu, Eric Verbeek
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -17,6 +17,7 @@ package org.thechiselgroup.biomixer.client.services.term;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.thechiselgroup.biomixer.client.services.AbstractJsonResultParser;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.ResourceNeighbourhood;
 import org.thechiselgroup.biomixer.shared.workbench.util.json.JsonParser;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 /**
@@ -46,12 +48,16 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
     private static final String OWL_THING = "owl:Thing";
 
     @Inject
+    private TermServiceImplementation tsi;
+
+    @Inject
     public FullTermResponseJsonParser(JsonParser jsonParser) {
         super(jsonParser);
     }
 
     public ResourceNeighbourhood parseNeighbourhood(String ontologyId,
             String json) {
+
         UriList parentConcepts = new UriList();
         UriList childConcepts = new UriList();
         List<Resource> resources = new ArrayList<Resource>();
@@ -89,6 +95,7 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
 
             Object entryListContents = get(get(get(entry, "list"), 0),
                     "classBean"); // "$.list[0].classBean"
+
             if (entryListContents == null || !isArray(entryListContents)) {
                 // if there is just one classbean it is not stored in an array
                 // XXX CLEAN THIS UP
@@ -102,6 +109,7 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
                 Resource neighbour = process(entryListContents,
                         "SuperClass".equals(relationType), ontologyId,
                         parentConcepts, childConcepts);
+
                 resources.add(neighbour);
                 continue;
             }
@@ -126,6 +134,9 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
         partialProperties.put(Concept.PARENT_CONCEPTS, parentConcepts);
         partialProperties.put(Concept.CHILD_CONCEPTS, childConcepts);
 
+        // for each resource, get its definition
+        parseResources(resources);
+
         return new ResourceNeighbourhood(partialProperties, resources);
     }
 
@@ -145,6 +156,16 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
         resource.putValue(Concept.LABEL, label);
         resource.putValue(Concept.VIRTUAL_ONTOLOGY_ID, ontologyId);
 
+        // get definitions, but display only the first definition
+        Object definitionsArray = get(queriedResource, "definitions");
+        // not all the concepts are associated with definitions
+        if (definitionsArray != null) {
+            Object definitionsObject = get(definitionsArray, 0);
+            String definitions = asString(get(definitionsObject, "string"));
+
+            resource.putValue(Concept.DEFINITION, definitions);
+        }
+
         ResourceNeighbourhood neighbourhood = parseNeighbourhood(ontologyId,
                 json);
         resource.applyPartialProperties(neighbourhood.getPartialProperties());
@@ -152,9 +173,41 @@ public class FullTermResponseJsonParser extends AbstractJsonResultParser {
         return resource;
     }
 
+    public void parseResources(List<Resource> resources) {
+
+        for (int i = 0; i < resources.size(); i++) {
+            final Resource resource = resources.get(i);
+            HashMap<String, Serializable> properties = resource.getProperties();
+            String virturalOntologyId = (String) properties
+                    .get("virtualOntologyId");
+            String conceptFullId = (String) properties.get("fullId");
+
+            final AsyncCallback<Resource> callback = new AsyncCallback<Resource>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(Resource conceptWithDefinition) {
+
+                    resource.putValue(Concept.DEFINITION,
+                            (String) conceptWithDefinition
+                                    .getValue(Concept.DEFINITION));
+                }
+
+            };
+            if (tsi != null && virturalOntologyId != null
+                    && conceptFullId != null && callback != null) {
+                tsi.getBasicInformationNoOntologyName(virturalOntologyId,
+                        conceptFullId, callback);
+            }
+
+        }
+    }
+
     private Resource process(Object relation, boolean reversed,
             String ontologyId, UriList parentConcepts, UriList childConcepts) {
-
         String conceptId = asString(get(relation, "fullId"));
         String conceptShortId = asString(get(relation, "id"));
         String label = asString(get(relation, "label"));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2011 Lars Grammel 
+ * Copyright (C) 2011 Lars Grammel, Bo Fu, Eric Verbeek 
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -94,4 +94,24 @@ public class TermServiceImplementation extends AbstractWebResourceService
                 });
     }
 
+    public void getBasicInformationNoOntologyName(final String ontologyId,
+            String conceptFullId, final AsyncCallback<Resource> callback) {
+
+        assert ontologyId != null;
+        assert conceptFullId != null;
+        assert callback != null;
+
+        final String url = buildUrl(ontologyId, conceptFullId);
+
+        fetchUrl(callback, url, new Transformer<String, Resource>() {
+
+            @Override
+            public Resource transform(String value) throws Exception {
+                Resource resource = responseParser.parseConcept(ontologyId,
+                        value);
+                return resource;
+
+            }
+        });
+    }
 }

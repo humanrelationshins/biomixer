@@ -31,8 +31,7 @@ public class OntologyNameJsonParser extends AbstractJsonResultParser {
     public String parse(String json) {
         return asString(get(
                 get(get(get(get(super.parse(json), "success"), "data"), 0),
-                        "ontologyBean"),
-                "displayLabel"));
+                        "ontologyBean"), "displayLabel"));
     }
 
 }

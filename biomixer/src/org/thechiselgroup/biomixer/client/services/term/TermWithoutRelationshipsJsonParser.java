@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 David Rusk 
+ * Copyright 2012 David Rusk, Bo Fu  
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -31,8 +31,8 @@ public class TermWithoutRelationshipsJsonParser extends
     }
 
     public Resource parseConcept(String ontologyId, String json) {
-        Object classBean = get(get(get(get(parse(json), "success"), "data"), 0),
-                "classBean");
+        Object classBean = get(
+                get(get(get(parse(json), "success"), "data"), 0), "classBean");
 
         String fullId = asString(get(classBean, "fullId"));
         String shortId = asString(get(classBean, "id"));
@@ -40,14 +40,20 @@ public class TermWithoutRelationshipsJsonParser extends
         String type = asString(get(classBean, "type"));
 
         Resource result = new Resource(Concept.toConceptURI(ontologyId, fullId));
-
         result.putValue(Concept.FULL_ID, fullId);
         result.putValue(Concept.SHORT_ID, shortId);
         result.putValue(Concept.VIRTUAL_ONTOLOGY_ID, ontologyId);
         result.putValue(Concept.TYPE, type);
         result.putValue(Concept.LABEL, label);
 
+        // get definitions, but display only the first one
+        Object definitionsArray = get(classBean, "definitions");
+        if (definitionsArray != null) {
+            Object definitionsObject = get(definitionsArray, 0);
+            String definition = asString(get(definitionsObject, "string"));
+            result.putValue(Concept.DEFINITION, definition);
+        }
+
         return result;
     }
-
 }
