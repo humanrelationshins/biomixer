@@ -23,10 +23,12 @@ import org.thechiselgroup.biomixer.client.Concept;
 import org.thechiselgroup.biomixer.client.Mapping;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.services.AbstractJsonResultParser;
+import org.thechiselgroup.biomixer.client.services.term.TermServiceImplementation;
 import org.thechiselgroup.biomixer.shared.core.util.date.DateTimeFormat;
 import org.thechiselgroup.biomixer.shared.core.util.date.DateTimeFormatFactory;
 import org.thechiselgroup.biomixer.shared.workbench.util.json.JsonParser;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 public class MappingResponseJsonParser extends AbstractJsonResultParser {
@@ -36,6 +38,9 @@ public class MappingResponseJsonParser extends AbstractJsonResultParser {
     private static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss.S z";
 
     private final DateTimeFormat dateFormat;
+
+    @Inject
+    private TermServiceImplementation tsi;
 
     @Inject
     public MappingResponseJsonParser(JsonParser jsonParser,
@@ -50,15 +55,36 @@ public class MappingResponseJsonParser extends AbstractJsonResultParser {
         Resource resource = new Resource(Mapping.toMappingURI(id));
         resource.putValue(Mapping.ID, id);
 
-        String sourceOntologyId = getOntologyIdAsString(mapping,
+        final String sourceOntologyId = getOntologyIdAsString(mapping,
                 "sourceOntologyId");
         // NOTE: odd json format -> {source: [{fullId: <fullId>}], target:
         // [{fullId: <fullId>}]}
-        String sourceConceptId = asString(get(get(get(mapping, "source"), 0),
-                "fullId"));
+        final String sourceConceptId = asString(get(
+                get(get(mapping, "source"), 0), "fullId"));
         String sourceUri = Concept.toConceptURI(sourceOntologyId,
                 sourceConceptId);
         resource.putValue(Mapping.SOURCE, sourceUri);
+
+        // adding definitions for the source concepts
+        final AsyncCallback<Resource> sourceCallback = new AsyncCallback<Resource>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Resource conceptWithDefinition) {
+                Concept.createConceptResource(sourceOntologyId, sourceConceptId)
+                        .putValue(
+                                Concept.DEFINITION,
+                                (String) conceptWithDefinition
+                                        .getValue(Concept.DEFINITION));
+            }
+        };
+        if (tsi != null && sourceOntologyId != null && sourceConceptId != null
+                && sourceCallback != null) {
+            tsi.getBasicInformationNoOntologyName(sourceOntologyId,
+                    sourceConceptId, sourceCallback);
+        }
 
         String targetOntologyId = getOntologyIdAsString(mapping,
                 "targetOntologyId");
@@ -67,6 +93,27 @@ public class MappingResponseJsonParser extends AbstractJsonResultParser {
         String targetUri = Concept.toConceptURI(targetOntologyId,
                 targetConceptId);
         resource.putValue(Mapping.TARGET, targetUri);
+
+        // adding definitions for the target concepts
+        final AsyncCallback<Resource> targetCallback = new AsyncCallback<Resource>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Resource conceptWithDefinition) {
+                Concept.createConceptResource(sourceOntologyId, sourceConceptId)
+                        .putValue(
+                                Concept.DEFINITION,
+                                (String) conceptWithDefinition
+                                        .getValue(Concept.DEFINITION));
+            }
+        };
+        if (tsi != null && sourceOntologyId != null && sourceConceptId != null
+                && targetCallback != null) {
+            tsi.getBasicInformationNoOntologyName(sourceOntologyId,
+                    sourceConceptId, targetCallback);
+        }
 
         String mappingType = asString(get(mapping, "mappingType"));
         resource.putValue(Mapping.MAPPING_TYPE, mappingType);
