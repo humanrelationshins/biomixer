@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009, 2010 Lars Grammel 
+ * Copyright 2009, 2010 Lars Grammel, Bo Fu 
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -101,7 +101,9 @@ public class AutomaticOntologyExpander implements GraphNodeExpander {
 
                         Resource resource = visualItem.getResources()
                                 .getFirstElement();
-                        resource.putValue(Ontology.DESCRIPTION,
+                        // correcting a mistake here - should assign value to
+                        // the number of concepts, not ontology description.
+                        resource.putValue(Ontology.NUMBER_OF_CONCEPTS,
                                 results.numberOfClasses);
                     }
 

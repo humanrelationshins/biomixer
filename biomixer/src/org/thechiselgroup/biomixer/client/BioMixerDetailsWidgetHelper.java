@@ -117,7 +117,10 @@ public class BioMixerDetailsWidgetHelper extends AbstractDetailsWidgetHelper {
             addRow(resource, verticalPanel, "Ontology Acronym", Ontology.LABEL);
             addRow(resource, verticalPanel, "Ontology ID",
                     Ontology.VIRTUAL_ONTOLOGY_ID);
-            addRow(resource, verticalPanel, "Description", Ontology.DESCRIPTION);
+            // add text wrapping to the ontology description. the default value
+            // "true" turns off wrapping.
+            addRow(resource, verticalPanel, "Description",
+                    Ontology.DESCRIPTION, false);
             addRow(resource, verticalPanel, "Num Concepts",
                     Ontology.NUMBER_OF_CONCEPTS);
 

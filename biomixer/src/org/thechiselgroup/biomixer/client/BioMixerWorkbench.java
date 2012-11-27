@@ -62,9 +62,9 @@ public class BioMixerWorkbench extends WorkbenchInitializer {
 
         // TODO Why is this prepared with strings that are indexed into a
         // registry when we can hard-code classes used or use injection?
-        addCreateWindowActionToToolbar(VIEWS_PANEL, "Graph",
+        addCreateWindowActionToToolbar(VIEWS_PANEL, "Concept Graph",
                 GraphViewContentDisplayFactory.ID);
-        addCreateWindowActionToToolbar(VIEWS_PANEL, "Ontology Overview",
+        addCreateWindowActionToToolbar(VIEWS_PANEL, "Ontology Graph",
                 GraphOntologyOverviewViewContentDisplayFactory.ID);
         addCreateWindowActionToToolbar(VIEWS_PANEL, "Text",
                 TextViewContentDisplayFactory.ID);
