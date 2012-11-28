@@ -50,14 +50,19 @@ public abstract class MappedHandlerVisualItemBehavior<T> implements
     protected abstract T createHandler(VisualItem visualItem);
 
     protected T getHandler(VisualItem visualItem) {
+        if (!mappedHandlers.containsKey(visualItem.getId())) {
+            mappedHandlers.put(visualItem.getId(), createHandler(visualItem));
+        }
+
         return mappedHandlers.get(visualItem.getId());
+
     }
 
     @Override
     public final void onInteraction(VisualItem visualItem,
             VisualItemInteraction interaction) {
 
-        assertContainsVisualItem(visualItem);
+        // assertContainsVisualItem(visualItem);
         assert interaction != null;
 
         T handler = getHandler(visualItem);
@@ -83,18 +88,19 @@ public abstract class MappedHandlerVisualItemBehavior<T> implements
         for (VisualItem item : event.getDelta().getRemovedElements()) {
             onVisualItemRemoved(item);
         }
-        for (VisualItem item : event.getDelta().getAddedElements()) {
-            onVisualItemCreated(item);
-        }
+        /*
+         * for (VisualItem item : event.getDelta().getAddedElements()) {
+         * onVisualItemCreated(item); }
+         */
     }
 
     public void onVisualItemCreated(VisualItem visualItem) {
         assertDoesNotContainVisualItem(visualItem);
-        mappedHandlers.put(visualItem.getId(), createHandler(visualItem));
+        // mappedHandlers.put(visualItem.getId(), createHandler(visualItem));
     }
 
     public void onVisualItemRemoved(VisualItem visualItem) {
-        assertContainsVisualItem(visualItem);
+        // assertContainsVisualItem(visualItem);
         disposeUtil.safelyDispose(mappedHandlers.remove(visualItem.getId()));
     }
 
