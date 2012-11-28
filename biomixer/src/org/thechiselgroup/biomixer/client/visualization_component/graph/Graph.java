@@ -601,6 +601,38 @@ public class Graph extends AbstractViewContentDisplay implements
     }
 
     @Override
+    public SidePanelSection[] getPartialSidePanelSections() {
+        List<ViewContentDisplayAction> actions = new ArrayList<ViewContentDisplayAction>();
+        // TODO cleanup
+
+        NodeAnimator nodeAnimator = getNodeAnimator();
+        actions.add(new GraphLayoutAction(GraphLayouts.CIRCLE_LAYOUT,
+                new CircleLayoutAlgorithm(errorHandler, nodeAnimator)));
+        actions.add(new GraphLayoutAction(GraphLayouts.FORCE_DIRECTED_LAYOUT,
+                new ForceDirectedLayoutAlgorithm(new CompositeForceCalculator(
+                        new BoundsAwareAttractionCalculator(graphDisplay
+                                .getLayoutGraph()),
+                        new BoundsAwareRepulsionCalculator(graphDisplay
+                                .getLayoutGraph())), 0.9, nodeAnimator,
+                        new GwtDelayedExecutor(), errorHandler)));
+
+        VerticalPanel layoutPanel = new VerticalPanel();
+        for (final ViewContentDisplayAction action : actions) {
+            Button w = new Button(action.getLabel());
+            w.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    action.execute();
+                }
+            });
+            layoutPanel.add(w);
+        }
+
+        return new SidePanelSection[] { new SidePanelSection("Layouts",
+                layoutPanel), };
+    }
+
+    @Override
     public Slot[] getSlots() {
         return new Slot[] { NODE_LABEL_SLOT, NODE_BORDER_COLOR,
                 NODE_BACKGROUND_COLOR };

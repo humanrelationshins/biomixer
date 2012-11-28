@@ -69,6 +69,8 @@ public interface ViewContentDisplay extends VisualItemRenderer, IsWidget,
     // instead they should provide interfaces they can be adapted to
     SidePanelSection[] getSidePanelSections();
 
+    SidePanelSection[] getPartialSidePanelSections();
+
     /**
      * @return {@link Slot}s that are supported by this view content display.
      */

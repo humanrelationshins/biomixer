@@ -80,6 +80,11 @@ public class DelegatingViewContentDisplay implements ViewContentDisplay {
     }
 
     @Override
+    public SidePanelSection[] getPartialSidePanelSections() {
+        return delegate.getPartialSidePanelSections();
+    }
+
+    @Override
     public Slot[] getSlots() {
         return delegate.getSlots();
     }

@@ -273,4 +273,9 @@ public class TextVisualization extends AbstractViewContentDisplay {
             }
         }
     }
+
+    @Override
+    public SidePanelSection[] getPartialSidePanelSections() {
+        return null;
+    }
 }

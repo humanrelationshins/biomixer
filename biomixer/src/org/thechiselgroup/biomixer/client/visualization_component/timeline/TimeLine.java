@@ -23,6 +23,7 @@ import org.thechiselgroup.biomixer.client.core.persistence.PersistableRestoratio
 import org.thechiselgroup.biomixer.client.core.resources.ResourceSet;
 import org.thechiselgroup.biomixer.client.core.resources.persistence.ResourceSetAccessor;
 import org.thechiselgroup.biomixer.client.core.resources.persistence.ResourceSetCollector;
+import org.thechiselgroup.biomixer.client.core.ui.SidePanelSection;
 import org.thechiselgroup.biomixer.client.core.util.DataType;
 import org.thechiselgroup.biomixer.client.core.util.collections.Delta;
 import org.thechiselgroup.biomixer.client.core.util.collections.LightweightCollection;
@@ -224,6 +225,12 @@ public class TimeLine extends AbstractViewContentDisplay {
         for (VisualItem visualItem : visualItems) {
             visualItem.<TimeLineItem> getDisplayObject().setStatusStyling();
         }
+    }
+
+    @Override
+    public SidePanelSection[] getPartialSidePanelSections() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

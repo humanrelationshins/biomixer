@@ -472,7 +472,12 @@ public class BioMixerViewWindowContentProducer extends
                     resourceModel, visualizationModel));
             sidePanelSections
                     .add(createOntologyGraphArcsSidePanelSection(contentDisplay));
-            sidePanelSections.addAll(contentDisplay.getSidePanelSections());
+            // only create a partial layout list: no horizontal or vertial tree
+            // layouts here, since the nodes on an ontology graph don't have
+            // hierarchical relationships with one another.
+            sidePanelSections.addAll(contentDisplay
+                    .getPartialSidePanelSections());
+            // sidePanelSections.addAll(contentDisplay.getSidePanelSections());
 
             // temporarily removing the Comments view part
             // {
