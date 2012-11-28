@@ -103,8 +103,12 @@ public class AutomaticOntologyExpander implements GraphNodeExpander {
                                 .getFirstElement();
                         // correcting a mistake here - should assign value to
                         // the number of concepts, not ontology description.
-                        resource.putValue(Ontology.NUMBER_OF_CONCEPTS,
+                        resource.putValue(Ontology.NUMBER_OF_CLASSES,
                                 results.numberOfClasses);
+                        resource.putValue(Ontology.NUMBER_OF_INDIVIDUALS,
+                                results.numberOfIndividuals);
+                        resource.putValue(Ontology.NUMBER_OF_PROPERTIES,
+                                results.numberOfProperties);
                     }
 
                 });

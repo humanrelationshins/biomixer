@@ -119,17 +119,21 @@ public class BioMixerDetailsWidgetHelper extends AbstractDetailsWidgetHelper {
 
             addRow(resource, verticalPanel, "Ontology Homepage",
                     Ontology.HOMEPAGE);
-
             addRow(resource, verticalPanel, "Ontology Acronym",
                     Ontology.ACRONYM);
             addRow(resource, verticalPanel, "Ontology ID",
                     Ontology.VIRTUAL_ONTOLOGY_ID);
+            addRow(resource, verticalPanel, "Ontology Format", Ontology.FORMAT);
+            addRow(resource, verticalPanel, "Number of Classes",
+                    Ontology.NUMBER_OF_CLASSES);
+            addRow(resource, verticalPanel, "Number of Individuals",
+                    Ontology.NUMBER_OF_INDIVIDUALS);
+            addRow(resource, verticalPanel, "Number of Properties",
+                    Ontology.NUMBER_OF_PROPERTIES);
             // add text wrapping to the ontology description. the default value
             // "true" turns off wrapping.
             addRow(resource, verticalPanel, "Ontology Description",
                     Ontology.DESCRIPTION, false);
-            addRow(resource, verticalPanel, "Num Concepts",
-                    Ontology.NUMBER_OF_CONCEPTS);
 
         } else if (Mapping.isMapping(resource)) {
             verticalPanel.add(createAvatar("Mapping", resourceSet));

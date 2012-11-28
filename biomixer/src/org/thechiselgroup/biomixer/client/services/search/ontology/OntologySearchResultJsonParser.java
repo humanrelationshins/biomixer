@@ -58,9 +58,9 @@ public class OntologySearchResultJsonParser extends AbstractJsonResultParser {
                 asString(get(jsonItem, "displayLabel")));
         resource.putValue(Ontology.DESCRIPTION,
                 asString(get(jsonItem, "description")));
-        // @Bo
         resource.putValue(Ontology.HOMEPAGE,
                 asString(get(jsonItem, "homepage")));
+        resource.putValue(Ontology.FORMAT, asString(get(jsonItem, "format")));
 
         return resource;
     }

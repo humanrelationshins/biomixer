@@ -43,7 +43,13 @@ public final class Ontology {
 
     public static final String DESCRIPTION = "description";
 
-    public static final String NUMBER_OF_CONCEPTS = "numberOfConcepts";
+    public static final String NUMBER_OF_CLASSES = "numberOfClasses";
+
+    public static final String NUMBER_OF_INDIVIDUALS = "numberOfIndividuals";
+
+    public static final String NUMBER_OF_PROPERTIES = "numberOfProperties";
+
+    public static final String FORMAT = "format";
 
     // TODO Property that can be used to make link to ontology on bioportal
 
@@ -63,7 +69,6 @@ public final class Ontology {
 
     public static final String ONTOLOGY_NAME = "label";
 
-    // @Bo
     public static final String HOMEPAGE = "homepage";
 
     public static Resource createOntologyResource(String ontologyId) {
