@@ -35,7 +35,7 @@ public final class Ontology {
 
     public static final String RESOURCE_URI_PREFIX = "ncbo-ontology";
 
-    public static final String LABEL = "label";
+    public static final String ACRONYM = "acronym";
 
     public static final String TYPE = "type";
 
@@ -61,7 +61,10 @@ public final class Ontology {
 
     public static final String ONTOLOGY_VERSION_ID = "ontologyVersionId";
 
-    public static final String ONTOLOGY_NAME = "ontologyName";
+    public static final String ONTOLOGY_NAME = "label";
+
+    // @Bo
+    public static final String HOMEPAGE = "homepage";
 
     public static Resource createOntologyResource(String ontologyId) {
 

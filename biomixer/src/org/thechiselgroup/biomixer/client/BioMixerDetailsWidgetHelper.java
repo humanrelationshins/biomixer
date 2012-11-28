@@ -93,7 +93,7 @@ public class BioMixerDetailsWidgetHelper extends AbstractDetailsWidgetHelper {
 
         }
         if (Ontology.isOntology(resource)) {
-            // making the concept label clickable
+            // making the ontology label clickable
             ResourceSetAvatar avatar = createAvatar(
                     (String) resource.getValue(Ontology.ONTOLOGY_NAME),
                     resourceSet);
@@ -113,13 +113,20 @@ public class BioMixerDetailsWidgetHelper extends AbstractDetailsWidgetHelper {
 
             // The summary url is also clickable. Perhaps they can have
             // different targets? Not sure...
-            addRow("Summary", ontologySummaryUrl, true, verticalPanel);
-            addRow(resource, verticalPanel, "Ontology Acronym", Ontology.LABEL);
+            // solving the above problem - solution: ontology name points to the
+            // BioPortal link; homepage points to the original ontology site.
+            // addRow("Summary", ontologySummaryUrl, true, verticalPanel);
+
+            addRow(resource, verticalPanel, "Ontology Homepage",
+                    Ontology.HOMEPAGE);
+
+            addRow(resource, verticalPanel, "Ontology Acronym",
+                    Ontology.ACRONYM);
             addRow(resource, verticalPanel, "Ontology ID",
                     Ontology.VIRTUAL_ONTOLOGY_ID);
             // add text wrapping to the ontology description. the default value
             // "true" turns off wrapping.
-            addRow(resource, verticalPanel, "Description",
+            addRow(resource, verticalPanel, "Ontology Description",
                     Ontology.DESCRIPTION, false);
             addRow(resource, verticalPanel, "Num Concepts",
                     Ontology.NUMBER_OF_CONCEPTS);

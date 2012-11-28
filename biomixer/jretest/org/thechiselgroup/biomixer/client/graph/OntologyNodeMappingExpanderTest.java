@@ -246,7 +246,7 @@ public class OntologyNodeMappingExpanderTest {
     public void doNotLoadContainedConceptsWithLabel() {
         String addedResourceUri = Ontology.toOntologyURI("ontologyId2");
         Resource addedResource = new Resource(addedResourceUri);
-        addedResource.putValue(Ontology.LABEL, "label");
+        addedResource.putValue(Ontology.ACRONYM, "label");
 
         testLoadConcepts(0, addedResourceUri, addedResource);
     }
