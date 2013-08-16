@@ -52,10 +52,26 @@
   <!-- GWT SWF Bridge: gwt2swf -->
   <!-- <inherits name='pl.rmalinowski.gwt2swf.GWT2SWF' />  -->
   
-    <!--  super dev mode -->
+  
+  <!--  super dev mode -->
   <add-linker name="xsiframe"/>
   <set-configuration-property name="devModeRedirectEnabled" value="true"/>
   <set-property name="compiler.useSourceMaps" value="true" />
+  
+  
+  <!--  Webworkers support -->
+  <!--  From Rationals example in gwt-ns -->
+  <!-- Use the WorkerCompilationLinker to detect and compile sub workers-->
+  <!-- Using add-linker was refusing to work...does define-linker? One person said that define-linker isn't valid... 
+  One guy says that for xsiFrame, that there is a define-linker in gwt.core.Core, so I guess maybe I can define
+  this linker here then add it? -->
+  <define-linker name="workerCompilation"
+    class="gwt.ns.webworker.linker.WorkerCompilationLinker" />
+  <add-linker name="workerCompilation"/>
+  
+  <!--  From http://stackoverflow.com/questions/13730085/gwt-web-workers-unflattenkeylistintoanswers-not-defined -->
+  <!-- Doing this makes a dialog open every time I run it...annoying  <set-property name="user.agent" value="safari"/>  -->
+  <set-configuration-property name="user.agent.runtimeWarning" value="false" />
   
   
   <!-- client-side logging configuration -->
@@ -68,6 +84,7 @@
   <set-property name="gwt.logging.firebugHandler" value="ENABLED"/>
   <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED"/>
   <set-property name="gwt.logging.developmentModeHandler" value="ENABLED"/>  
+
   
   <!-- Client XPath/XSLT support via wrapping native browser support -->
   <!--  Moved these scripts to to the host page, index.html -->
