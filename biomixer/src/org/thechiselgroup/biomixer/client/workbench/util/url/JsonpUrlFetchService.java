@@ -15,7 +15,14 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.workbench.util.url;
 
+import gwt.ns.json.client.Json;
+import gwt.ns.webworker.client.MessageEvent;
+import gwt.ns.webworker.client.MessageHandler;
+
+import java.util.logging.Logger;
+
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandlingAsyncCallback;
+import org.thechiselgroup.biomixer.client.core.error_handling.LoggerProvider;
 import org.thechiselgroup.biomixer.client.core.error_handling.RetryAsyncCallbackErrorHandler;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
 import org.thechiselgroup.biomixer.client.json.JsJsonParser;
@@ -29,13 +36,85 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 /**
- * Retrieves the content of URLs using JSONP.
+ * Retrieves the content of URLs using JSONP. Also logs profiles of the
+ * retrieval process if the log flag is enabled.
  */
 public class JsonpUrlFetchService implements UrlFetchService {
 
+    protected final String ERROR_PREFIX = "Error code, status: ";
+
+    // // Worker module definition
+    // @WorkerModuleDef("org.thechiselgroup.biomixer.client.services.RestCallWorker")
+    // interface RestCallWorkerFactory extends WorkerFactory {
+    // }
+    //
+    // private final RestCallWorkerFactory factory;
+    //
+    // private final RestCallWorkerEntryPoint worker;
+
+    LoggerProvider loggerProvider;
+
+    private Logger logger;
+
+    private String url;
+
+    private long start;
+
+    private boolean performProfileLogging = true;
+
+    @Inject
+    public JsonpUrlFetchService(LoggerProvider loggerProvider) {
+        // public JsonpUrlFetchService() {
+
+        // // Worker creation
+        // factory = GWT.create(RestCallWorkerFactory.class);
+        // // Won't *actually* start, in terms of useful computation. Just
+        // stokes
+        // // the engine.
+        // worker = (RestCallWorkerEntryPoint) factory.createAndStart();
+        //
+        this.logger = loggerProvider.getLogger();
+    }
+
     @Override
     public void fetchURL(final String url, final AsyncCallback<String> callback) {
+        this.url = url;
+        this.start = System.currentTimeMillis();
+        if (this.performProfileLogging) {
+            logger.info("fetch url '" + url + "'");
+        }
         fetchURL(url, callback, 0);
+    }
+
+    MessageHandler callbackMessageHandler;
+
+    private MessageHandler createMessageHandler(
+            final AsyncCallback<String> callback) {
+        return new MessageHandler() {
+            @Override
+            public void onMessage(MessageEvent event) {
+                JavaScriptObject javaScriptObject = Json.parse(event.getData());
+                if (event.getData().startsWith(ERROR_PREFIX)) {
+                    // This wasn't a success, and we got an error code
+                    // we don't understand.
+                    // Treat as an error for the callback.
+                    if (performProfileLogging) {
+                        logger.info("fetch url '" + url + "' failed after "
+                                + (System.currentTimeMillis() - start) + "ms");
+                    }
+
+                    callback.onFailure(new Exception(event.getData()));
+                    return;
+                } else {
+                    if (performProfileLogging) {
+                        logger.info("fetch url '" + url + "' failed after "
+                                + (System.currentTimeMillis() - start) + "ms");
+                    }
+                    callback.onSuccess(javaScriptObject.toString());
+                    return;
+                }
+            }
+        };
     }
 
     /**
@@ -47,65 +126,140 @@ public class JsonpUrlFetchService implements UrlFetchService {
      * @param previousNumberTries
      */
     public void fetchURL(final String url,
-            final AsyncCallback<String> callback, int previousNumberTries) {
+            final AsyncCallback<String> callback, final int previousNumberTries) {
+
+        // TODO I think I want a web worker here, for waiting for the response.
+        // I feel like I want it for the callback too, but I can't see yet if
+        // that might be a different web worker, or the same one that waited.
+
+        // TODO I think the callback needs to be the MessageHandler, or the
+        // thing that made the callback...as a reference in the callback
+        // perhaps. The MessageHandler is on the outside of the web worker,
+        // and can therefore be in the 'main thread', or as close as is
+        // convenient, and capable of manipulating the DOM.
+        // I tis typical for the callback.onSuccess() to do some processing,
+        // then call things close ot the DOM (such as calling methods on the
+        // graph to add arcs and whatnot).
+        // The first step should be to set the WebWorker.onMessage() to feed
+        // into onSuccess.
+        // Really, I need to have the call to onSuccess() replaced by a call to
+        // onMessage(), which then calls onSuccess().
+        // TODO So...all the rest of this stuff needs to be called in execute()
+        // on the web worker?
+        // final MessageHandler callbackMessageHandler =
+        // createMessageHandler(callback);
+        // // worker.setMessageHandler(callback.getWebWorkerMessageHandler());
+        // worker.setMessageHandler(callbackMessageHandler);
+
+        // TODO I hate this. We have so many layers of delegation and wrapping
+        // that
+        // it makes comprehension and modification difficult.
+        // Can I push together parts of the request classes (callbacks,
+        // fetchUrl(), web worker)?
+        // WebWorkerCommand command = worker.new WebWorkerCommand() {
+        //
+        // @Override
+        // public void command() {
+
         JsonpRequestBuilder jsonp = new JsonpRequestBuilder();
-        // Could change timeout, but probably better to change retry attempt
-        // number...except that exacerbates server load. Maybe longer timeout is
+        // Could change timeout, but probably better to change retry
+        // attempt
+        // number...except that exacerbates server load. Maybe longer
+        // timeout is
         // ok.
         jsonp.setTimeout(jsonp.getTimeout() * 4);
 
-        jsonp.requestObject(url,
-                new ErrorHandlingAsyncCallback<JavaScriptObject>(
-                        new RetryAsyncCallbackErrorHandler(callback, url,
-                                previousNumberTries, this)) {
+        final RetryAsyncCallbackErrorHandler retryHandler = new RetryAsyncCallbackErrorHandler(
+                callback, url, previousNumberTries, JsonpUrlFetchService.this);
 
-                    @Override
-                    protected void runOnSuccess(JavaScriptObject result)
-                            throws Exception {
-                        // Had trouble with injection...explicitly creating
-                        // instead.
-                        ErrorCodeJSONParser errorCodeParser = new ErrorCodeJSONParser(
-                                new JsJsonParser());
+        ErrorHandlingAsyncCallback<JavaScriptObject> errorHandlingAsync = new ErrorHandlingAsyncCallback<JavaScriptObject>(
+                retryHandler) {
 
-                        JSONObject jsonObject = new JSONObject(result);
-                        String jsonString = jsonObject.toString();
+            @Override
+            protected void runOnSuccess(JavaScriptObject result)
+                    throws Exception {
+                // Had trouble with injection...explicitly creating
+                // instead.
+                ErrorCodeJSONParser errorCodeParser = new ErrorCodeJSONParser(
+                        new JsJsonParser());
 
-                        // Need to check for understood errors in response, such
-                        // as 403 forbidden.
+                JSONObject jsonObject = new JSONObject(result);
+                String jsonString = jsonObject.toString();
 
-                        Integer errorCode = errorCodeParser.parse(jsonString);
+                // Need to check for understood errors in response, such
+                // as 403 forbidden.
 
-                        if (null != errorCode && 500 == errorCode) {
-                            // 500 errors don't get here! Caught lower down?
-                            // We can retry this once, since I have already seen
-                            // cases of very singular failures here.
-                            boolean retryAttempted = ((RetryAsyncCallbackErrorHandler) callback)
-                                    .manualRetry();
-                            if (retryAttempted) {
-                                return;
-                            }
-                            // else if (403 == errorCode) {
-                            // // This error code, forbidden, is something I
-                            // want
-                            // // to ignore at the moment.
-                            // return;
-                            // }
-                        } else { // if (null == errorCode) {
-                            callback.onSuccess(jsonString);
-                            return;
-                        }
+                Integer errorCode = errorCodeParser.parse(jsonString);
 
-                        // This wasn't a success, and we got an error code
-                        // we don't understand.
-                        // Treat as an error for the callback.
-                        callback.onFailure(new Exception("Error code, status: "
-                                + errorCode + "."));
-                        throw new Exception("Status " + errorCode);
-
+                if (null != errorCode && 500 == errorCode) {
+                    // 500 errors don't get here! Caught lower down?
+                    // We can retry this once, since I have already seen
+                    // cases of very singular failures here.
+                    boolean retryAttempted = retryHandler.manualRetry();
+                    if (retryAttempted) {
+                        String errorMessage = "Error code, status: "
+                                + errorCode + ".";
+                        callback.onFailure(new Exception(errorMessage));
+                        // worker.postResults(JsonUtils
+                        // .safeEval(errorMessage));
+                        return;
                     }
+                    // else if (403 == errorCode) {
+                    // // This error code, forbidden, is something I
+                    // want
+                    // // to ignore at the moment.
+                    // return;
+                    // }
+                } else { // if (null == errorCode) {
+                    // TODO I am pretty sure we need to pass to the
+                    // callback.onSuccess() and callback.onFailure()
+                    // using
+                    // onMessage() from the web worker.
+                    // The good work happens just after those two
+                    // methods, and
+                    // the web worker's work is done, after all.
+                    // I can't seem to pass exceptions, since I need to
+                    // pass a
+                    // stringified json from postResults to
+                    // postMessage()...
+                    // TODO So how do I pass exceptions to the
+                    // callback.onFailure()???
+                    // TODO I think I need to combine the
+                    // RestCallWorkerEntry
+                    // and this UrlFetchService.
+                    callback.onSuccess(jsonString);
+                    // worker.postResults(result);
+                    return;
+                }
 
-                });
+                // This wasn't a success, and we got an error code
+                // we don't understand.
+                // Treat as an error for the callback.
+                String errorMessage = "Error code, status: " + errorCode + ".";
+                callback.onFailure(new Exception(errorMessage));
+                // worker.postResults(JsonUtils.safeEval(errorMessage));
+                // throw new Exception("Status " + errorCode);
 
+            }
+
+        };
+
+        jsonp.requestObject(url, errorHandlingAsync);
+
+    }
+
+    // };
+    //
+    // worker.execute(command);
+
+    // }
+
+    public boolean isLogging() {
+        return performProfileLogging;
+    }
+
+    public void setLogging(boolean performProfileLogging) {
+        this.performProfileLogging = performProfileLogging;
     }
 
     private class ErrorCodeJSONParser extends AbstractJsonResultParser {

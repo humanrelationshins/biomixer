@@ -23,11 +23,11 @@ import org.thechiselgroup.biomixer.client.Concept;
 import org.thechiselgroup.biomixer.client.Mapping;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.resources.UriList;
-import org.thechiselgroup.biomixer.client.core.util.callbacks.TransformingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactory;
 import org.thechiselgroup.biomixer.client.core.util.transform.Transformer;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilderFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
+import org.thechiselgroup.biomixer.client.services.AbstractWebResourceService;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.ResourceNeighbourhood;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -41,23 +41,17 @@ import com.google.inject.Inject;
  * 
  * @see "http://www.bioontology.org/wiki/index.php/BioPortal_Mappings_Service"
  */
-public class ConceptMappingServiceImplementation implements
-        ConceptMappingServiceAsync {
-
-    private final UrlFetchService urlFetchService;
+public class ConceptMappingServiceImplementation extends
+        AbstractWebResourceService implements ConceptMappingServiceAsync {
 
     private final MappingResponseJsonParser responseParser;
-
-    private final UrlBuilderFactory urlBuilderFactory;
 
     @Inject
     public ConceptMappingServiceImplementation(
             MappingResponseJsonParser responseParser,
             UrlFetchService urlFetchService, UrlBuilderFactory urlBuilderFactory) {
-
-        this.urlFetchService = urlFetchService;
+        super(urlFetchService, urlBuilderFactory);
         this.responseParser = responseParser;
-        this.urlBuilderFactory = urlBuilderFactory;
     }
 
     protected String buildUrl(String ontologyId, String conceptId) {
@@ -142,7 +136,8 @@ public class ConceptMappingServiceImplementation implements
             }
         };
 
-        urlFetchService.fetchURL(buildUrl(ontologyId, conceptId),
-                TransformingAsyncCallback.create(callback, transformer));
+        String url = buildUrl(ontologyId, conceptId);
+        fetchUrl(callback, url, transformer);
+
     }
 }

@@ -15,49 +15,56 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.core.util.url;
 
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
+//
+//import org.thechiselgroup.biomixer.client.core.error_handling.LoggerProvider;
+//import org.thechiselgroup.biomixer.client.core.util.callbacks.TransformingAsyncCallback;
+//
+//import com.google.inject.Inject;
+//import com.google.inject.name.Named;
 
-import org.thechiselgroup.biomixer.client.core.error_handling.LoggerProvider;
+/**
+ * Integrated into JsonpUrlFetchService.
+ * 
+ */
+public class ProfilingUrlFetchServiceDecorator
+// implements UrlFetchService
+{
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
-public class ProfilingUrlFetchServiceDecorator implements UrlFetchService {
-
-    private UrlFetchService delegate;
-
-    private Logger logger;
-
-    @Inject
-    public ProfilingUrlFetchServiceDecorator(
-            @Named("delegate") UrlFetchService delegate,
-            LoggerProvider loggerProvider) {
-
-        this.delegate = delegate;
-        this.logger = loggerProvider.getLogger();
-    }
-
-    @Override
-    public void fetchURL(final String url, final AsyncCallback<String> callback) {
-        final long start = System.currentTimeMillis();
-        logger.info("fetch url '" + url + "'");
-
-        delegate.fetchURL(url, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.info("fetch url '" + url + "' failed after "
-                        + (System.currentTimeMillis() - start) + "ms");
-                callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                logger.info("fetch url '" + url + "' succeeded after "
-                        + (System.currentTimeMillis() - start) + "ms");
-                callback.onSuccess(result);
-            }
-        });
-    }
+    // private UrlFetchService delegate;
+    //
+    // private Logger logger;
+    //
+    // @Inject
+    // public ProfilingUrlFetchServiceDecorator(
+    // @Named("delegate") UrlFetchService delegate,
+    // LoggerProvider loggerProvider) {
+    //
+    // this.delegate = delegate;
+    // this.logger = loggerProvider.getLogger();
+    // }
+    //
+    // @Override
+    // public void fetchURL(final String url,
+    // final TransformingAsyncCallback<String, ?> callback) {
+    // final long start = System.currentTimeMillis();
+    // logger.info("fetch url '" + url + "'");
+    //
+    // delegate.fetchURL(url, new TransformingAsyncCallback() {
+    // @Override
+    // public void onFailure(Throwable caught) {
+    // logger.info("fetch url '" + url + "' failed after "
+    // + (System.currentTimeMillis() - start) + "ms");
+    // callback.onFailure(caught);
+    // }
+    //
+    // @Override
+    // public void onSuccess(String result) {
+    // logger.info("fetch url '" + url + "' succeeded after "
+    // + (System.currentTimeMillis() - start) + "ms");
+    // callback.onSuccess(result);
+    // }
+    // });
+    // }
 
 }
