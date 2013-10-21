@@ -1,9 +1,9 @@
 package org.thechiselgroup.biomixer.client.core.error_handling;
 
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 import org.thechiselgroup.biomixer.client.workbench.util.url.JsonpUrlFetchService;
 
 import com.google.gwt.jsonp.client.TimeoutException;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class RetryAsyncCallbackErrorHandler extends AsyncCallbackErrorHandler {
 
@@ -11,15 +11,15 @@ public class RetryAsyncCallbackErrorHandler extends AsyncCallbackErrorHandler {
 
     private final String url;
 
-    private final AsyncCallback<String> fetchCallback;
+    private final TrackingAsyncCallback<String> fetchCallback;
 
     private final JsonpUrlFetchService urlFetchService;
 
     static private final int MAX_NUMBER_OF_TRIES = 3;
 
-    public RetryAsyncCallbackErrorHandler(AsyncCallback<String> callback,
-            final String url, int prevNumberOfTries,
-            JsonpUrlFetchService fetchService) {
+    public RetryAsyncCallbackErrorHandler(
+            TrackingAsyncCallback<String> callback, final String url,
+            int prevNumberOfTries, JsonpUrlFetchService fetchService) {
         super(callback);
         this.prevNumberOfTries = prevNumberOfTries;
         this.url = url;

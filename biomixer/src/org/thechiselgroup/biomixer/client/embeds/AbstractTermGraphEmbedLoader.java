@@ -49,7 +49,7 @@ public abstract class AbstractTermGraphEmbedLoader implements TermEmbedLoader {
 
     protected NodeAnimator nodeAnimator;
 
-    private LoadingBarAssistant loadingBar;
+    // private LoadingBarAssistant loadingBar;
 
     public AbstractTermGraphEmbedLoader(String label, String id) {
         assert label != null;
@@ -77,6 +77,7 @@ public abstract class AbstractTermGraphEmbedLoader implements TermEmbedLoader {
     }
 
     protected void hideLoadingBar() {
+        // Make use of the URL Fetch Registry
         loadingBar.hide();
     }
 

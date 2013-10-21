@@ -29,6 +29,7 @@ import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactor
 import org.thechiselgroup.biomixer.client.core.util.transform.Transformer;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilderFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.ResourceNeighbourhood;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -134,8 +135,9 @@ public class ConceptMappingServiceImplementation implements
                 return new ResourceNeighbourhood(partialProperties, mappings);
             }
         };
-
-        urlFetchService.fetchURL(buildUrl(ontologyAcronym, conceptId),
-                TransformingAsyncCallback.create(callback, transformer));
+        String url = buildUrl(ontologyAcronym, conceptId);
+        Fetch fetch = new Fetch(url);
+        urlFetchService.fetchURL(url,
+                TransformingAsyncCallback.create(callback, transformer, fetch));
     }
 }

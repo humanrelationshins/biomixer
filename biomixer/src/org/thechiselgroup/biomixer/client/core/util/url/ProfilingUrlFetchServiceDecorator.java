@@ -19,8 +19,9 @@ import java.util.logging.Logger;
 
 import org.thechiselgroup.biomixer.client.core.configuration.ChooselInjectionConstants;
 import org.thechiselgroup.biomixer.client.core.error_handling.LoggerProvider;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -40,25 +41,27 @@ public class ProfilingUrlFetchServiceDecorator implements UrlFetchService {
     }
 
     @Override
-    public void fetchURL(final String url, final AsyncCallback<String> callback) {
+    public void fetchURL(final String url,
+            final TrackingAsyncCallback<String> callback) {
         final long start = System.currentTimeMillis();
         logger.info("fetch url '" + url + "'");
 
-        delegate.fetchURL(url, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.info("fetch url '" + url + "' failed after "
-                        + (System.currentTimeMillis() - start) + "ms");
-                callback.onFailure(caught);
-            }
+        delegate.fetchURL(url,
+                new TrackingAsyncCallback<String>(new Fetch(url)) {
+                    @Override
+                    public void trackedFailure(Throwable caught) {
+                        logger.info("fetch url '" + url + "' failed after "
+                                + (System.currentTimeMillis() - start) + "ms");
+                        callback.onFailure(caught);
+                    }
 
-            @Override
-            public void onSuccess(String result) {
-                logger.info("fetch url '" + url + "' succeeded after "
-                        + (System.currentTimeMillis() - start) + "ms");
-                callback.onSuccess(result);
-            }
-        });
+                    @Override
+                    public void trackedSuccess(String result) {
+                        logger.info("fetch url '" + url + "' succeeded after "
+                                + (System.currentTimeMillis() - start) + "ms");
+                        callback.onSuccess(result);
+                    }
+                });
     }
 
 }

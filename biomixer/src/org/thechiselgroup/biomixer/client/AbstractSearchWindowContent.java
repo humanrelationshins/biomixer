@@ -37,6 +37,7 @@ import org.thechiselgroup.biomixer.client.dnd.windows.AbstractWindowContent;
 import org.thechiselgroup.biomixer.client.dnd.windows.ViewWindowContent;
 import org.thechiselgroup.biomixer.client.dnd.windows.WindowPanel;
 import org.thechiselgroup.biomixer.client.services.AbstractWebResourceService;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 import org.thechiselgroup.biomixer.client.services.search.concept.ConceptSearchServiceAsync;
 import org.thechiselgroup.biomixer.client.visualization_component.text.TextVisualization;
 import org.thechiselgroup.biomixer.client.workbench.ui.configuration.ViewWindowContentProducer;
@@ -180,7 +181,7 @@ abstract public class AbstractSearchWindowContent extends AbstractWindowContent
      * @param windowCallBack
      */
     abstract protected void searchForTerm(String queryText,
-            AsyncCallback<Set<Resource>> callBack);
+            AbstractSearchCallbackFactory searchCallbackFactory);
 
     @Override
     public void init() {
@@ -207,12 +208,28 @@ abstract public class AbstractSearchWindowContent extends AbstractWindowContent
             return;
         }
 
-        searchForTerm(searchTerm, new SearchCallback());
+        searchForTerm(searchTerm, new ConceptSearchCallbackFactory());
     }
 
-    private final class SearchCallback implements AsyncCallback<Set<Resource>> {
+    public class ConceptSearchCallbackFactory extends AbstractSearchCallbackFactory {
+
+        public ConceptSearchCallbackFactory() {
+        }
+
         @Override
-        public void onFailure(Throwable caught) {
+        public AbstractSearchCallback createSearchCallback(Fetch fetch) {
+            return new ConceptSearchCallback(fetch);
+        }
+    }
+
+    protected final class ConceptSearchCallback extends AbstractSearchCallback {
+
+        public ConceptSearchCallback(Fetch fetch) {
+            super(fetch);
+        }
+
+        @Override
+        public void trackedFailure(Throwable caught) {
             infoLabel.setText("Search failed for '" + searchTerm + "'");
             deckPanel.updateWindowSize();
 
@@ -220,7 +237,7 @@ abstract public class AbstractSearchWindowContent extends AbstractWindowContent
         }
 
         @Override
-        public void onSuccess(Set<Resource> result) {
+        public void trackedSuccess(Set<Resource> result) {
             if (result.isEmpty()) {
                 infoLabel.setText("No results found for search term '"
                         + searchTerm + "'");

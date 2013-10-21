@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
 
@@ -125,7 +126,7 @@ public class FlashUrlFetchService extends SWFWidget implements UrlFetchService {
     }
 
     @Override
-    public void fetchURL(String url, AsyncCallback<String> callback) {
+    public void fetchURL(String url, TrackingAsyncCallback<String> callback) {
         addUrlCallback(url, callback);
 
         switch (status) {

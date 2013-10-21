@@ -23,10 +23,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.thechiselgroup.biomixer.client.Ontology;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallback;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 import org.thechiselgroup.biomixer.client.core.configuration.ChooselInjectionConstants;
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandler;
-import org.thechiselgroup.biomixer.client.core.error_handling.LoggingErrorHandler;
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandlingAsyncCallback;
+import org.thechiselgroup.biomixer.client.core.error_handling.LoggingErrorHandler;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.resources.ResourceSet;
 import org.thechiselgroup.biomixer.client.core.resources.ResourceSetFactory;
@@ -36,6 +38,7 @@ import org.thechiselgroup.biomixer.client.core.visualization.View;
 import org.thechiselgroup.biomixer.client.dnd.resources.DropEnabledViewContentDisplay;
 import org.thechiselgroup.biomixer.client.dnd.windows.ViewWindowContent;
 import org.thechiselgroup.biomixer.client.graph.OntologyNodeMappingExpander;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 import org.thechiselgroup.biomixer.client.services.ontology_overview.OntologyMappingCount;
 import org.thechiselgroup.biomixer.client.services.ontology_overview.OntologyMappingCountServiceAsync;
 import org.thechiselgroup.biomixer.client.services.ontology_overview.TotalMappingCount;
@@ -103,76 +106,98 @@ public class OntologyMappingNeighbourhoodLoader implements OntologyEmbedLoader
 
     private void doLoadData(final String centralOntologyAcronym,
             final View graphView, final ErrorHandler errorHandler) {
-        mappingService.getAllMappingCountsForCentralOntology(
-                centralOntologyAcronym,
-                new ErrorHandlingAsyncCallback<TotalMappingCount>(
-                        errorHandler) {
+        mappingService
+                .getAllMappingCountsForCentralOntology(centralOntologyAcronym,
+                        new ErrorHandlingAsyncCallback<TotalMappingCount>(
+                                errorHandler) {
 
-                    @Override
-                    protected String getMessage(Throwable caught) {
-                        return "Error finding ontology mappings";
-                    }
+                            @Override
+                            protected String getMessage(Throwable caught) {
+                                return "Error finding ontology mappings";
+                            }
 
-                    @Override
-                    protected void runOnSuccess(
-                            TotalMappingCount mappingCountResults)
-                            throws Exception {
+                            @Override
+                            protected void runOnSuccess(
+                                    TotalMappingCount mappingCountResults)
+                                    throws Exception {
 
-                        // if (!graphView.isInitialized()) {
-                        // return;
-                        // }
-                        // Create resources for each ontology, including target
-                        // and mapped ontologies.
-                        // Set<String> ontologyIds = new HashSet<String>();
-                        // ontologyIds.add(centralOntologyVirtualId);
+                                // if (!graphView.isInitialized()) {
+                                // return;
+                                // }
+                                // Create resources for each ontology, including target
+                                // and mapped ontologies.
+                                // Set<String> ontologyIds = new HashSet<String>();
+                                // ontologyIds.add(centralOntologyVirtualId);
 
-                        Set<String> ontologyAcronyms = new HashSet<String>();
-                        ontologyAcronyms.add(centralOntologyAcronym);
+                                Set<String> ontologyAcronyms = new HashSet<String>();
+                                ontologyAcronyms.add(centralOntologyAcronym);
 
-                        // Iterate through the neighbourhood
-                        // for (OntologyMappingCount ontologyCount :
-                        // mappingCountResults) {
-                        // ontologyIds.add(ontologyCount.getTargetOntologyAcronym());
-                        // }
-                        for (OntologyMappingCount ontologyCount : mappingCountResults) {
-                            ontologyAcronyms.add(ontologyCount
-                                    .getTargetOntologyAcronym());
-                        }
+                                // Iterate through the neighbourhood
+                                // for (OntologyMappingCount ontologyCount :
+                                // mappingCountResults) {
+                                // ontologyIds.add(ontologyCount.getTargetOntologyAcronym());
+                                // }
+                                for (OntologyMappingCount ontologyCount : mappingCountResults) {
+                                    ontologyAcronyms.add(ontologyCount
+                                            .getTargetOntologyAcronym());
+                                }
 
-                        // Window.alert("Mapping count: "
-                        // + CollectionUtils
-                        // .asSortedList(ontologyAcronyms).size()
-                        // + "");
-                        OntologyDetailsCallback ontologyDetailsCallback = new OntologyDetailsCallback(
-                                graphView, mappingCountResults);
-                        searchService.searchOntologiesPredeterminedSet(
-                                ontologyAcronyms, ontologyDetailsCallback);
-                    }
+                                // Window.alert("Mapping count: "
+                                // + CollectionUtils
+                                // .asSortedList(ontologyAcronyms).size()
+                                // + "");
 
-                });
+                                searchService
+                                        .searchOntologiesPredeterminedSet(
+                                                ontologyAcronyms,
+                                                new OntologySearchCallbackFactory(
+                                                        graphView,
+                                                        mappingCountResults));
+                            }
+
+                        });
     }
 
-    private class OntologyDetailsCallback implements
-            AsyncCallback<Set<Resource>> {
+    public class OntologySearchCallbackFactory extends AbstractSearchCallbackFactory {
+        private final View graphView;
+
+        private final TotalMappingCount mappingCountResults;
+
+        public OntologySearchCallbackFactory(View graphView,
+                TotalMappingCount mappingCountResults) {
+            super();
+            this.graphView = graphView;
+            this.mappingCountResults = mappingCountResults;
+        }
+
+        @Override
+        public AbstractSearchCallback createSearchCallback(Fetch fetch) {
+            return new OntologyDetailsCallback(graphView, mappingCountResults,
+                    fetch);
+        }
+    }
+
+    private class OntologyDetailsCallback extends AbstractSearchCallback {
 
         private final View graphView;
 
         private final TotalMappingCount mappingCounts;
 
         public OntologyDetailsCallback(View graphView,
-                TotalMappingCount mappingCounts) {
+                TotalMappingCount mappingCounts, Fetch fetch) {
+            super(fetch);
             this.graphView = graphView;
             this.mappingCounts = mappingCounts;
         }
 
         @Override
-        public void onFailure(Throwable caught) {
+        public void trackedFailure(Throwable caught) {
             // infoLabel.setText("Search failed for '" + searchTerm + "'");
             loggingErrorHandler.handleError(caught);
         }
 
         @Override
-        public void onSuccess(Set<Resource> ontologyDetailsResults) {
+        public void trackedSuccess(Set<Resource> ontologyDetailsResults) {
             // The resources we have here are fully detailed ontology resources.
             // How do we resolve these against the ones we created based on the
             // mapping neighbourhood data?

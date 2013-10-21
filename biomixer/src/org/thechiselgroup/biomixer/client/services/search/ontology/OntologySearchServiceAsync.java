@@ -16,20 +16,17 @@
 package org.thechiselgroup.biomixer.client.services.search.ontology;
 
 import java.util.Collection;
-import java.util.Set;
 
-import org.thechiselgroup.biomixer.client.core.resources.Resource;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 
 // TODO generalize search interface
 public interface OntologySearchServiceAsync {
 
     void searchOntologies(String queryText,
-            AsyncCallback<Set<Resource>> callback);
+            AbstractSearchCallbackFactory callbackFactory);
 
     public void searchOntologiesPredeterminedSet(
             Collection<String> ontologyAcronyms,
-            AsyncCallback<Set<Resource>> callback);
+            AbstractSearchCallbackFactory callbackFactory);
 
 }

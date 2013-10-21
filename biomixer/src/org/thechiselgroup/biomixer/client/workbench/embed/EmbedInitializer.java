@@ -78,6 +78,8 @@ public class EmbedInitializer implements ApplicationInitializer {
 
         EmbeddedViewLoader embeddedViewLoader = embedLoaders.get(embedMode);
 
+        Window.alert("Integrate the UrlFetchRegistry into a progress indicator of some kind");
+
         embedContainer.setInfoText("Loading...");
         embeddedViewLoader.loadView(windowLocation, embedMode,
                 new AsyncCallback<IsWidget>() {

@@ -40,6 +40,7 @@ import org.thechiselgroup.biomixer.client.Mapping;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.resources.UriList;
 import org.thechiselgroup.biomixer.client.core.test.mockito.MockitoGWTBridge;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.util.url.DefaultUrlBuilder;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilderFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
@@ -81,8 +82,8 @@ public class MappingServiceImplementationTest {
         when(responseParser.parseForConceptMapping(xmlResultStub)).thenReturn(
                 parsedMappings);
 
-        ArgumentCaptor<AsyncCallback> captor = ArgumentCaptor
-                .forClass(AsyncCallback.class);
+        ArgumentCaptor<TrackingAsyncCallback> captor = ArgumentCaptor
+                .forClass(TrackingAsyncCallback.class);
         doNothing().when(urlFetchService).fetchURL(eq(URL), captor.capture());
 
         underTest.getMappings(ontologyId1, Concept.getConceptId(conceptUri),
@@ -177,6 +178,6 @@ public class MappingServiceImplementationTest {
                 mock(AsyncCallback.class));
 
         verify(urlFetchService, times(1)).fetchURL(eq(URL),
-                any(AsyncCallback.class));
+                any(TrackingAsyncCallback.class));
     }
 }

@@ -15,15 +15,11 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.services.search.concept;
 
-import java.util.Set;
-
-import org.thechiselgroup.biomixer.client.core.resources.Resource;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 
 // TODO generalize search interface
 public interface ConceptSearchServiceAsync {
 
-    void searchConcept(String queryText, AsyncCallback<Set<Resource>> callback);
+    void searchConcept(String queryText, AbstractSearchCallbackFactory callBack);
 
 }

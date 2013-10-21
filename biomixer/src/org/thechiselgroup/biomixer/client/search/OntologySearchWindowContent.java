@@ -15,16 +15,13 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.search;
 
-import java.util.Set;
-
 import org.thechiselgroup.biomixer.client.AbstractSearchWindowContent;
 import org.thechiselgroup.biomixer.client.Ontology;
-import org.thechiselgroup.biomixer.client.core.resources.Resource;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 import org.thechiselgroup.biomixer.client.core.resources.ResourceSetFactory;
 import org.thechiselgroup.biomixer.client.services.search.ontology.OntologySearchServiceAsync;
 import org.thechiselgroup.biomixer.client.workbench.ui.configuration.ViewWindowContentProducer;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 public class OntologySearchWindowContent extends AbstractSearchWindowContent {
@@ -42,8 +39,8 @@ public class OntologySearchWindowContent extends AbstractSearchWindowContent {
 
     @Override
     protected void searchForTerm(String queryText,
-            AsyncCallback<Set<Resource>> callBack) {
-        searchService.searchOntologies(queryText, callBack);
+            AbstractSearchCallbackFactory callBackFactory) {
+        searchService.searchOntologies(queryText, callBackFactory);
 
     }
 }

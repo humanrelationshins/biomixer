@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.core.util.url;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 
 public interface UrlFetchService {
 
-    void fetchURL(String url, AsyncCallback<String> callback);
+    void fetchURL(String url, TrackingAsyncCallback<String> callback);
 
 }

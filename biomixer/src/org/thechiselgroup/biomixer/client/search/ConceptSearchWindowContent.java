@@ -15,16 +15,13 @@
  *******************************************************************************/
 package org.thechiselgroup.biomixer.client.search;
 
-import java.util.Set;
-
 import org.thechiselgroup.biomixer.client.AbstractSearchWindowContent;
 import org.thechiselgroup.biomixer.client.Concept;
-import org.thechiselgroup.biomixer.client.core.resources.Resource;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 import org.thechiselgroup.biomixer.client.core.resources.ResourceSetFactory;
 import org.thechiselgroup.biomixer.client.services.search.concept.ConceptSearchServiceAsync;
 import org.thechiselgroup.biomixer.client.workbench.ui.configuration.ViewWindowContentProducer;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 public class ConceptSearchWindowContent extends AbstractSearchWindowContent {
@@ -42,7 +39,7 @@ public class ConceptSearchWindowContent extends AbstractSearchWindowContent {
 
     @Override
     protected void searchForTerm(String queryTerm,
-            AsyncCallback<Set<Resource>> callBack) {
+            AbstractSearchCallbackFactory callBack) {
         searchService.searchConcept(queryTerm, callBack);
     }
 

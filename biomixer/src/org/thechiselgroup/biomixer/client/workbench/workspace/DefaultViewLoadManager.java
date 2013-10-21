@@ -156,7 +156,7 @@ public class DefaultViewLoadManager implements ViewLoadManager {
                     public View transform(ViewDTO dto) throws Exception {
                         return loadView(dto);
                     }
-                }));
+                }, null));
     }
 
     protected View loadView(ViewDTO dto) {
@@ -177,7 +177,7 @@ public class DefaultViewLoadManager implements ViewLoadManager {
                     public Workspace transform(ViewDTO dto) throws Exception {
                         return loadWindow(dto);
                     }
-                }));
+                }, null));
     }
 
     @Override
@@ -188,7 +188,7 @@ public class DefaultViewLoadManager implements ViewLoadManager {
                     public Workspace transform(ViewDTO dto) {
                         return loadWorkspace(dto);
                     }
-                }));
+                }, null));
     }
 
     @Override
@@ -207,7 +207,7 @@ public class DefaultViewLoadManager implements ViewLoadManager {
                         }
                         return previews;
                     }
-                }));
+                }, null));
     }
 
     protected Workspace loadWindow(ViewDTO dto) {

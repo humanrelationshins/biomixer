@@ -1,6 +1,6 @@
 package org.thechiselgroup.biomixer.client.core.error_handling;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 
 /**
  * 
@@ -9,9 +9,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class AsyncCallbackErrorHandler implements ErrorHandler {
 
-    private final AsyncCallback<?> callback;
+    private final TrackingAsyncCallback<?> callback;
 
-    public AsyncCallbackErrorHandler(AsyncCallback<?> callback) {
+    public AsyncCallbackErrorHandler(TrackingAsyncCallback<?> callback) {
         assert callback != null;
 
         this.callback = callback;

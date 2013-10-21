@@ -41,9 +41,8 @@ public abstract class AbstractWebResourceService {
 
     protected <T> void fetchUrl(final AsyncCallback<T> callback, String url,
             Transformer<String, T> transformer) {
-
+        Fetch fetch = new Fetch(url);
         urlFetchService.fetchURL(url,
-                TransformingAsyncCallback.create(callback, transformer));
+                TransformingAsyncCallback.create(callback, transformer, fetch));
     }
-
 }

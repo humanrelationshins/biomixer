@@ -16,16 +16,20 @@
 package org.thechiselgroup.biomixer.client.core.util.callbacks;
 
 import org.thechiselgroup.biomixer.client.core.util.transform.Transformer;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class TransformingAsyncCallback<FROM, TO> implements AsyncCallback<FROM> {
+public class TransformingAsyncCallback<FROM, TO> extends
+        TrackingAsyncCallback<FROM> {
 
     // NOTE: allows creation without specifying generics twice
     public static <FROM, TO> TransformingAsyncCallback<FROM, TO> create(
-            AsyncCallback<TO> callback, Transformer<FROM, TO> transformer) {
+            AsyncCallback<TO> callback, Transformer<FROM, TO> transformer,
+            Fetch fetch) {
 
-        return new TransformingAsyncCallback<FROM, TO>(callback, transformer);
+        return new TransformingAsyncCallback<FROM, TO>(callback, transformer,
+                fetch);
     }
 
     private final AsyncCallback<TO> callback;
@@ -33,7 +37,8 @@ public class TransformingAsyncCallback<FROM, TO> implements AsyncCallback<FROM> 
     private final Transformer<FROM, TO> transformer;
 
     protected TransformingAsyncCallback(AsyncCallback<TO> callback,
-            Transformer<FROM, TO> transformer) {
+            Transformer<FROM, TO> transformer, Fetch fetch) {
+        super(fetch);
 
         assert transformer != null;
         assert callback != null;
@@ -43,12 +48,14 @@ public class TransformingAsyncCallback<FROM, TO> implements AsyncCallback<FROM> 
     }
 
     @Override
-    public void onFailure(Throwable caught) {
+    public void trackedFailure(Throwable caught) {
+
         callback.onFailure(caught);
     }
 
     @Override
-    public void onSuccess(FROM result) {
+    public void trackedSuccess(FROM result) {
+
         try {
             callback.onSuccess(transformer.transform(result));
         } catch (Exception e) {

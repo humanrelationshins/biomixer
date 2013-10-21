@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.thechiselgroup.biomixer.client.core.test.mockito.MockitoGWTBridge;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.util.url.DefaultUrlBuilder;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilder;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
@@ -57,8 +58,8 @@ public class MappingCountServiceTest {
         when(responseParser.parse(xmlResultStub))
                 .thenReturn(parsedMappingCount);
 
-        ArgumentCaptor<AsyncCallback> captor = ArgumentCaptor
-                .forClass(AsyncCallback.class);
+        ArgumentCaptor<TrackingAsyncCallback> captor = ArgumentCaptor
+                .forClass(TrackingAsyncCallback.class);
         doNothing().when(urlFetchService).fetchURL(eq(URL), captor.capture());
 
         underTest.getMappingCounts(ontologyIds, callback);
@@ -123,6 +124,6 @@ public class MappingCountServiceTest {
         underTest.getMappingCounts(ontologyIds, mock(AsyncCallback.class));
 
         verify(urlFetchService, times(1)).fetchURL(eq(URL),
-                any(AsyncCallback.class));
+                any(TrackingAsyncCallback.class));
     }
 }

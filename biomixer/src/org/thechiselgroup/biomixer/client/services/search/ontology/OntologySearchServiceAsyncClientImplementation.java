@@ -19,13 +19,14 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.thechiselgroup.biomixer.client.Ontology;
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.util.transform.Transformer;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilderFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
 import org.thechiselgroup.biomixer.client.services.AbstractWebResourceService;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 public class OntologySearchServiceAsyncClientImplementation extends
@@ -58,37 +59,41 @@ public class OntologySearchServiceAsyncClientImplementation extends
 
     @Override
     public void searchOntologies(final String queryText,
-            final AsyncCallback<Set<Resource>> callback) {
+            final AbstractSearchCallbackFactory callbackFactory) {
         final String url = buildUrl(queryText);
-        fetchUrl(callback, url, new Transformer<String, Set<Resource>>() {
-            @Override
-            public Set<Resource> transform(String responseText)
-                    throws Exception {
-                resultParser.setFilterPropertyAndContainedText(
-                        Ontology.ONTOLOGY_FULL_NAME, queryText);
-                return resultParser.parseOntologySearchResults(responseText);
-            }
-        });
+        fetchUrl(callbackFactory.createSearchCallback(new Fetch(url)), url,
+                new Transformer<String, Set<Resource>>() {
+                    @Override
+                    public Set<Resource> transform(String responseText)
+                            throws Exception {
+                        resultParser.setFilterPropertyAndContainedText(
+                                Ontology.ONTOLOGY_FULL_NAME, queryText);
+                        return resultParser
+                                .parseOntologySearchResults(responseText);
+                    }
+                });
     }
 
     @Override
     public void searchOntologiesPredeterminedSet(
             final Collection<String> ontologyAcronyms,
-            final AsyncCallback<Set<Resource>> callback) {
+            final AbstractSearchCallbackFactory callbackFactory) {
 
         String url = buildUrl("");
 
-        fetchUrl(callback, url, new Transformer<String, Set<Resource>>() {
-            @Override
-            public Set<Resource> transform(String responseText)
-                    throws Exception {
-                // resultParser.setFilterPropertyAndContainedText(
-                // Ontology.VIRTUAL_ONTOLOGY_ID, virtualOntologyIds);
-                resultParser.setFilterPropertyAndContainedText(
-                        Ontology.ONTOLOGY_ACRONYM, ontologyAcronyms);
-                return resultParser.parseOntologySearchResults(responseText);
-            }
-        });
+        fetchUrl(callbackFactory.createSearchCallback(new Fetch(url)), url,
+                new Transformer<String, Set<Resource>>() {
+                    @Override
+                    public Set<Resource> transform(String responseText)
+                            throws Exception {
+                        // resultParser.setFilterPropertyAndContainedText(
+                        // Ontology.VIRTUAL_ONTOLOGY_ID, virtualOntologyIds);
+                        resultParser.setFilterPropertyAndContainedText(
+                                Ontology.ONTOLOGY_ACRONYM, ontologyAcronyms);
+                        return resultParser
+                                .parseOntologySearchResults(responseText);
+                    }
+                });
 
     }
 }

@@ -17,11 +17,13 @@ package org.thechiselgroup.biomixer.client.services.search.concept;
 
 import java.util.Set;
 
+import org.thechiselgroup.biomixer.client.AbstractSearchCallbackFactory;
 import org.thechiselgroup.biomixer.client.core.resources.Resource;
 import org.thechiselgroup.biomixer.client.core.util.transform.Transformer;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlBuilderFactory;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
 import org.thechiselgroup.biomixer.client.services.AbstractWebResourceService;
+import org.thechiselgroup.biomixer.client.services.Fetch;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -49,7 +51,7 @@ public class ConceptSearchServiceAsyncClientImplementation extends
 
     @Override
     public void searchConcept(final String queryText,
-            final AsyncCallback<Set<Resource>> callback) {
+            final AbstractSearchCallbackFactory callbackFactory) {
 
         // This is a nice way to get closure in life :)
         (new Object() {
@@ -57,7 +59,8 @@ public class ConceptSearchServiceAsyncClientImplementation extends
 
             public void callForNextPage() {
                 final String url = buildUrl(queryText, pageNumberToRequest);
-
+                AsyncCallback<Set<Resource>> callback = callbackFactory
+                        .createSearchCallback(new Fetch(url));
                 fetchUrl(callback, url,
                         new Transformer<String, Set<Resource>>() {
                             @Override

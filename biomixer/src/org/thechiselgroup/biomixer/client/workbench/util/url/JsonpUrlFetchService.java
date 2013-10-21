@@ -17,6 +17,7 @@ package org.thechiselgroup.biomixer.client.workbench.util.url;
 
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandlingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.error_handling.RetryAsyncCallbackErrorHandler;
+import org.thechiselgroup.biomixer.client.core.util.callbacks.TrackingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.util.url.UrlFetchService;
 import org.thechiselgroup.biomixer.client.json.JsJsonParser;
 import org.thechiselgroup.biomixer.shared.workbench.util.json.AbstractJsonResultParser;
@@ -25,7 +26,6 @@ import org.thechiselgroup.biomixer.shared.workbench.util.json.JsonParser;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.jsonp.client.JsonpRequestBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 /**
@@ -34,7 +34,8 @@ import com.google.inject.Inject;
 public class JsonpUrlFetchService implements UrlFetchService {
 
     @Override
-    public void fetchURL(final String url, final AsyncCallback<String> callback) {
+    public void fetchURL(final String url,
+            final TrackingAsyncCallback<String> callback) {
         fetchURL(url, callback, 0);
     }
 
@@ -47,17 +48,19 @@ public class JsonpUrlFetchService implements UrlFetchService {
      * @param previousNumberTries
      */
     public void fetchURL(final String url,
-            final AsyncCallback<String> callback, int previousNumberTries) {
+            final TrackingAsyncCallback<String> callback,
+            int previousNumberTries) {
         JsonpRequestBuilder jsonp = new JsonpRequestBuilder();
         // Could change timeout, but probably better to change retry attempt
         // number...except that exacerbates server load. Maybe longer timeout is
         // ok.
         jsonp.setTimeout(jsonp.getTimeout() * 4);
 
+        final RetryAsyncCallbackErrorHandler retryAsyncCallbackErrorHandler = new RetryAsyncCallbackErrorHandler(
+                callback, url, previousNumberTries, this);
         jsonp.requestObject(url,
                 new ErrorHandlingAsyncCallback<JavaScriptObject>(
-                        new RetryAsyncCallbackErrorHandler(callback, url,
-                                previousNumberTries, this)) {
+                        retryAsyncCallbackErrorHandler) {
 
                     @Override
                     protected void runOnSuccess(JavaScriptObject result)
@@ -84,7 +87,8 @@ public class JsonpUrlFetchService implements UrlFetchService {
                             // 500 errors don't get here! Caught lower down?
                             // We can retry this once, since I have already seen
                             // cases of very singular failures here.
-                            boolean retryAttempted = ((RetryAsyncCallbackErrorHandler) callback)
+                            boolean retryAttempted = retryAsyncCallbackErrorHandler
+                            // ((RetryAsyncCallbackErrorHandler) callback)
                                     .manualRetry();
                             if (retryAttempted) {
                                 return;
