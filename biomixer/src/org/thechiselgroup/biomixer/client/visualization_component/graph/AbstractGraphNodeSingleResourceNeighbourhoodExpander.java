@@ -52,7 +52,8 @@ public abstract class AbstractGraphNodeSingleResourceNeighbourhoodExpander<T ext
         assert graphExpansionCallback != null;
 
         Resource resource = getSingleResource(visualItem);
-
+        // Window.alert("Expand neighbourhood soon for "
+        // + Concept.getLabel(resource));
         if (isNeighbourhoodLoaded(visualItem, resource)) {
             expandNeighbourhood(visualItem, resource, graphExpansionCallback,
                     reconstructNeighbourhood(visualItem, resource));

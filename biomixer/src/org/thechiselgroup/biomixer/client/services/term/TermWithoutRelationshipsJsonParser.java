@@ -24,6 +24,7 @@ import org.thechiselgroup.biomixer.client.core.util.collections.CollectionFactor
 import org.thechiselgroup.biomixer.shared.workbench.util.json.AbstractJsonResultParser;
 import org.thechiselgroup.biomixer.shared.workbench.util.json.JsonParser;
 
+import com.google.gwt.dev.util.collect.HashSet;
 import com.google.inject.Inject;
 
 public class TermWithoutRelationshipsJsonParser extends
@@ -56,6 +57,79 @@ public class TermWithoutRelationshipsJsonParser extends
                 fullId, label, type);
 
         return result;
+    }
+
+    /**
+     * This might be wrong headed to do it here, this way. We will save the most
+     * by ensuring that we make a single call for concepts with children, plus a
+     * single parent call per concept, plus whatever mapping calls we need. This
+     * is best implemented where automatic expanders are triggered when adding
+     * resources...
+     * 
+     * So perhaps the only problem here then is creating new resources for the
+     * children and parents; we merely need to get the properties here.
+     * 
+     * @param jsonObject
+     * @return
+     */
+    public Set<Resource> parseConceptsWithChildren(Object jsonObject) {
+        Set<Resource> results = new HashSet<Resource>();
+        Resource targetResource = parseConcept(jsonObject);
+        results.add(targetResource);
+
+        // Nested properties if accessing it with include=properties,
+        // which is the case when we parse for the target concept, but not the
+        // case when parsing children and parents in arrays from the same call.
+        if (has(jsonObject, "properties")) {
+            Object propertiesArray = get(jsonObject, "properties");
+            if (!has(jsonObject, "prefLabel")) {
+                String label = asString(get(
+                        get(propertiesArray,
+                                "http://www.w3.org/2004/02/skos/core#prefLabel"),
+                        "string"));
+                targetResource.putValue(label, Concept.LABEL);
+            }
+        }
+
+        // Nested children if accessing it with include=children
+        if (has(jsonObject, "children")) {
+            Object childrenArray = get(jsonObject, "children");
+            int numChildren = length(childrenArray);
+            for (int i = 0; i < numChildren; i++) {
+                // TODO We probably want to avoid creating this Resour4ce, and
+                // get the URI only.
+                Resource child = parseConcept(get(childrenArray, i));
+                results.add(child);
+                // And add children links to target
+                targetResource.addChild(child.getUri());
+            }
+        }
+
+        // Nested parents if accessing it with include=parents
+        if (has(jsonObject, "parents")) {
+            Object childrenArray = get(jsonObject, "parents");
+            int numChildren = length(childrenArray);
+            for (int i = 0; i < numChildren; i++) {
+                // TODO We probably want to avoid creating this Resour4ce, and
+                // get the URI only.
+                Resource parent = parseConcept(get(childrenArray, i));
+                results.add(parent);
+                // And add children links to target
+                targetResource.addParent(parent.getUri());
+            }
+        }
+
+        // So we save ourselves the children and parent calls for this target
+        // resource, but we still need to get the mappings for the target, as
+        // well as the parent, children and mappings for each neighbor node.
+        // So...did we save anything? Maybe not for the first node layer, but
+        // when we do a bulk call on the basis of these resources, to get their
+        // children and parents...suppose we make a single child, parent and
+        // mapping call each, for each neighbour. That is 3*N calls. The bulk
+        // calling allows us to do the parent and children calls in bulk each,
+        // which makes us do N+2 calls (2 for the child and parent bulks).
+
+        return results;
     }
 
     /**

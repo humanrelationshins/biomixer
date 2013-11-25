@@ -93,6 +93,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -494,6 +495,7 @@ public class Graph extends AbstractViewContentDisplay implements
          * 
          * NOTE: we do not execute the expanders if we are restoring the graph
          */
+//        Window.alert("Auto expand single");
         registry.getAutomaticExpander(type).expand(visualItem,
                 expansionCallback);
 
@@ -986,7 +988,6 @@ public class Graph extends AbstractViewContentDisplay implements
     @Override
     public void update(Delta<VisualItem> delta,
             LightweightCollection<Slot> updatedSlots) {
-
         for (VisualItem addedItem : delta.getAddedElements()) {
             createGraphNodeItem(addedItem);
             updateNode(addedItem);
@@ -1037,6 +1038,7 @@ public class Graph extends AbstractViewContentDisplay implements
         }
         if (!delta.getAddedElements().isEmpty()
                 || !delta.getRemovedElements().isEmpty()) {
+//            Window.alert("Bulkin'");
             for (String type : types.keySet()) {
                 registry.getAutomaticBulkExpander(type).expand(types.get(type),
                         expansionCallback);

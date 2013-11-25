@@ -18,6 +18,7 @@ package org.thechiselgroup.biomixer.client.embeds;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.thechiselgroup.biomixer.client.Concept;
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandler;
 import org.thechiselgroup.biomixer.client.core.error_handling.ErrorHandlingAsyncCallback;
 import org.thechiselgroup.biomixer.client.core.resources.DefaultResourceSet;
@@ -33,6 +34,7 @@ import org.thechiselgroup.biomixer.client.visualization_component.graph.Resource
 import org.thechiselgroup.biomixer.client.visualization_component.graph.layout.LayoutAlgorithm;
 import org.thechiselgroup.biomixer.client.visualization_component.graph.layout.implementation.tree.VerticalTreeLayoutAlgorithm;
 
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 
 public class TermNeighbourhoodLoader extends AbstractTermGraphEmbedLoader {
@@ -147,6 +149,9 @@ public class TermNeighbourhoodLoader extends AbstractTermGraphEmbedLoader {
             targetResource.addRelationalProperties(targetNeighbourhood
                     .getPartialProperties());
             resourceSet.addAll(targetNeighbourhood.getResources());
+            Window.alert("This is where we have to diverge logic for aggregation for a bulk call, should hit twice, once for parents once for children"
+                    + resourceSet.size());
+            // LEFTOFF on Friday
             graphView.getResourceModel().addResourceSet(resourceSet);
         }
 
@@ -227,6 +232,14 @@ public class TermNeighbourhoodLoader extends AbstractTermGraphEmbedLoader {
                         resourceSet.add(targetResource);
                         graphView.getResourceModel()
                                 .addResourceSet(resourceSet);
+                        // We call parents and children down in here, and
+                        // mappings in the auto expander I believe. If I want to
+                        // merge properties and children (and parents after that
+                        // is fixed), I have to re-arrange starting here. We've
+                        // already accessed the central node's properties,
+                        // right?
+                        Window.alert("expanding neighbour parent and children "
+                                + targetResource.getValue(Concept.LABEL));
                         conceptNeighbourhoodService.getNeighbourhood(
                                 ontologyAcronym, fullConceptId,
                                 new ConceptNeighbourhoodCallback(errorHandler,

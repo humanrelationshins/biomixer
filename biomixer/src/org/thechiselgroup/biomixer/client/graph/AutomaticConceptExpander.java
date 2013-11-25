@@ -39,7 +39,10 @@ public class AutomaticConceptExpander implements NodeExpander<Graph> {
 
     @Override
     public void expand(VisualItem item, NodeExpansionCallback<Graph> graph) {
-        conceptMappingNeighbourhoodLoader.expand(item, graph);
-        conceptConceptNeighbourhoodLoader.expand(item, graph);
+        // Window.alert("Autoexpand concept");
+        // TODO Test to ensure these do the work that I think we can use bulk
+        // calls on
+        // conceptMappingNeighbourhoodLoader.expand(item, graph);
+        // conceptConceptNeighbourhoodLoader.expand(item, graph);
     }
 }

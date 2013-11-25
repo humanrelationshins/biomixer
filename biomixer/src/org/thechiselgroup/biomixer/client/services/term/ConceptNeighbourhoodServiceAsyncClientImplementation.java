@@ -86,7 +86,6 @@ public class ConceptNeighbourhoodServiceAsyncClientImplementation extends
         @Override
         protected void runOnSuccess(Map<String, String> compositionNeighbourhood)
                 throws Exception {
-
             // Gets the target relation with properties, parses properties for
             // composition relations,
             // and sends off calls to fetch the data for each of those. Those
@@ -278,7 +277,8 @@ public class ConceptNeighbourhoodServiceAsyncClientImplementation extends
         // fetch composition relations (has_part and part_of)
         // The original callback can accept trickling" results, that is,
         // multiple runSuccess calls. Works great for the composition calls
-        // that occur within the composition parser(should those be pulled out here?)
+        // that occur within the composition parser(should those be pulled out
+        // here?)
         final String compositionUrl = buildCompositionUrl(conceptId,
                 ontologyAcroynm);
         CompositionRelationFetcherCallback compositionRelationReFetcherCallback = new CompositionRelationFetcherCallback(
